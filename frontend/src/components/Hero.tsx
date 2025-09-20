@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { memo } from "react";
 import { GradientButton, OutlineButton } from "@/components/AnimatedButton";
 
-export default function Hero() {
+const Hero = memo(function Hero() {
   return (
     <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden">
       {/* Animated Background Option 1: Glowing Gradient */}
@@ -150,33 +151,39 @@ export default function Hero() {
 
       {/* Floating particles */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(15)].map((_, i) => (
-          <motion.div
-            key={i}
-            className={`absolute w-2 h-2 rounded-full ${
-              i % 3 === 0
-                ? "bg-blue-300/30"
-                : i % 3 === 1
-                ? "bg-purple-300/30"
-                : "bg-pink-300/30"
-            }`}
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              y: [-20, -100],
-              opacity: [0, 1, 0],
-              scale: [0, 1, 0],
-            }}
-            transition={{
-              duration: Math.random() * 3 + 4,
-              ease: "easeOut",
-              repeat: Infinity,
-              delay: Math.random() * 5,
-            }}
-          />
-        ))}
+        {[...Array(15)].map((_, i) => {
+          // Generate stable positions based on index to avoid re-renders
+          const left = (i * 23 + 17) % 100; // Pseudo-random but stable
+          const top = (i * 37 + 29) % 100; // Pseudo-random but stable
+
+          return (
+            <motion.div
+              key={i}
+              className={`absolute w-2 h-2 rounded-full ${
+                i % 3 === 0
+                  ? "bg-blue-300/30"
+                  : i % 3 === 1
+                  ? "bg-purple-300/30"
+                  : "bg-pink-300/30"
+              }`}
+              style={{
+                left: `${left}%`,
+                top: `${top}%`,
+              }}
+              animate={{
+                y: [-20, -100],
+                opacity: [0, 1, 0],
+                scale: [0, 1, 0],
+              }}
+              transition={{
+                duration: (i % 3) + 4, // Stable duration based on index
+                ease: "easeOut",
+                repeat: Infinity,
+                delay: (i % 5) * 0.5, // Stable delay based on index
+              }}
+            />
+          );
+        })}
       </div>
 
       {/* Main Content */}
@@ -664,4 +671,6 @@ export default function Hero() {
       </div>
     </div>
   );
-}
+});
+
+export default Hero;

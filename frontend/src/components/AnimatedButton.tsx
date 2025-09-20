@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { ReactNode } from "react";
+import Link from "next/link";
 
 interface AnimatedButtonProps {
   children: ReactNode;
@@ -139,27 +140,20 @@ export function OutlineButton({
 export function GradientButton({
   children,
   gradient = "from-blue-500 to-purple-600",
+  href,
   ...props
 }: AnimatedButtonProps & { gradient?: string }) {
-  return (
-    <motion.button
-      onClick={props.onClick}
-      disabled={props.disabled}
-      className={`
-        relative inline-flex items-center justify-center px-8 py-3 
-        font-semibold text-white rounded-lg transition-all duration-300 
-        overflow-hidden group focus:outline-none focus:ring-2 
-        focus:ring-offset-2 focus:ring-blue-500 shadow-lg hover:shadow-2xl
-        bg-gradient-to-r ${gradient}
-        ${props.className || ""}
-      `}
-      whileHover={{
-        scale: 1.02,
-        boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
-      }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ duration: 0.2 }}
-    >
+  const buttonClasses = `
+    relative inline-flex items-center justify-center px-8 py-3 
+    font-semibold text-white rounded-lg transition-all duration-300 
+    overflow-hidden group focus:outline-none focus:ring-2 
+    focus:ring-offset-2 focus:ring-blue-500 shadow-lg hover:shadow-2xl
+    bg-gradient-to-r ${gradient}
+    ${props.className || ""}
+  `;
+
+  const ButtonContent = () => (
+    <>
       {/* Animated overlay gradient */}
       <motion.div
         className="absolute inset-0 bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500"
@@ -188,6 +182,42 @@ export function GradientButton({
 
       {/* Content */}
       <span className="relative z-10">{children}</span>
+    </>
+  );
+
+  // If href is provided, use Link for navigation
+  if (href) {
+    return (
+      <Link href={href}>
+        <motion.a
+          className={buttonClasses}
+          whileHover={{
+            scale: 1.02,
+            boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
+          }}
+          whileTap={{ scale: 0.98 }}
+          transition={{ duration: 0.2 }}
+        >
+          <ButtonContent />
+        </motion.a>
+      </Link>
+    );
+  }
+
+  // Otherwise, use button for click handling
+  return (
+    <motion.button
+      onClick={props.onClick}
+      disabled={props.disabled}
+      className={buttonClasses}
+      whileHover={{
+        scale: 1.02,
+        boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
+      }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.2 }}
+    >
+      <ButtonContent />
     </motion.button>
   );
 }

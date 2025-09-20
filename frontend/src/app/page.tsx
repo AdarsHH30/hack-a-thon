@@ -1,10 +1,10 @@
 import MainLayout from "@/components/layouts/MainLayout";
-import Hero from "@/components/Hero";
+import HeroPage from "@/components/HeroPage";
 
 export default function HomePage() {
   return (
     <MainLayout>
-      <Hero />
+      <HeroPage />
     </MainLayout>
   );
 }
