@@ -1,0 +1,23 @@
+# Python virtual environment
+venv/
+env/
+ENV/
+virtualenv/
+.env/
+.venv/
+env.bak/
+venv.bak/
+
+# Python byte-compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Local development settings
+.env
+.env.local
