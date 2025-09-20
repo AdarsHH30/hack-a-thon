@@ -1,8 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { supabase } from "@/lib/supabaseClient";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import MainLayout from "@/components/layouts/MainLayout";
 
 export default function StudentLoginPage() {
@@ -11,6 +16,17 @@ export default function StudentLoginPage() {
     password: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const message = searchParams.get("message");
+    if (message) {
+      setSuccessMessage(message);
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,9 +86,8 @@ export default function StudentLoginPage() {
           transition={{ duration: 0.6 }}
           className="relative z-10 w-full max-w-md"
         >
-          <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden border border-white/20 p-8">
-            {/* Header */}
-            <div className="text-center mb-8">
+          <Card className="bg-white/95 backdrop-blur-sm border-white/20 shadow-2xl">
+            <CardHeader className="text-center">
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
@@ -81,28 +96,38 @@ export default function StudentLoginPage() {
               >
                 <span className="text-2xl text-white">🎓</span>
               </motion.div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              <CardTitle className="text-2xl font-bold text-gray-900">
                 Student Login
-              </h1>
-              <p className="text-gray-600">
+              </CardTitle>
+              <CardDescription className="text-gray-600">
                 Access your resume analysis dashboard
-              </p>
-            </div>
+              </CardDescription>
+            </CardHeader>
 
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <CardContent>
+              {successMessage && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-green-50 border border-green-200 rounded-lg p-3 mb-6"
+                >
+                  <p className="text-sm text-green-600">{successMessage}</p>
+                </motion.div>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                   Email Address
                 </label>
-                <input
+                <Input
                   type="email"
                   id="email"
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white/80"
+                  className="w-full"
                   placeholder="Enter your email"
                 />
               </div>
@@ -111,14 +136,14 @@ export default function StudentLoginPage() {
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
                   Password
                 </label>
-                <input
+                <Input
                   type="password"
                   id="password"
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white/80"
+                  className="w-full"
                   placeholder="Enter your password"
                 />
               </div>
@@ -139,45 +164,59 @@ export default function StudentLoginPage() {
                 </Link>
               </div>
 
-              <motion.button
-                type="submit"
-                disabled={isLoading}
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-red-50 border border-red-200 rounded-lg p-3"
+                >
+                  <p className="text-sm text-red-600">{error}</p>
+                </motion.div>
+              )}
+
+              <motion.div
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLoading ? (
-                  <div className="flex items-center justify-center">
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                    Signing in...
-                  </div>
-                ) : (
-                  "Sign In"
-                )}
-              </motion.button>
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold"
+                >
+                  {isLoading ? (
+                    <div className="flex items-center justify-center">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                      Signing in...
+                    </div>
+                  ) : (
+                    "Sign In"
+                  )}
+                </Button>
+              </motion.div>
             </form>
 
-            {/* Footer */}
-            <div className="mt-8 pt-6 border-t border-gray-200 text-center">
-              <p className="text-sm text-gray-600">
-                Don&apos;t have an account?{" "}
-                <Link
-                  href="/student-register"
-                  className="text-blue-600 hover:text-blue-800 font-medium transition-colors"
-                >
-                  Register here
-                </Link>
-              </p>
-              <div className="mt-4">
-                <Link
-                  href="/"
-                  className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 transition-colors"
-                >
-                  ← Back to home
-                </Link>
+              {/* Footer */}
+              <div className="mt-6 pt-6 border-t border-gray-200 text-center">
+                <p className="text-sm text-gray-600">
+                  Don&apos;t have an account?{" "}
+                  <Link
+                    href="/register"
+                    className="text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                  >
+                    Register here
+                  </Link>
+                </p>
+                <div className="mt-4">
+                  <Link
+                    href="/"
+                    className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 transition-colors"
+                  >
+                    ← Back to home
+                  </Link>
+                </div>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </motion.div>
       </div>
     </MainLayout>

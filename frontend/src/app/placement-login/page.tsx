@@ -15,7 +15,7 @@ export default function PlacementLoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     // Simulate login process
     setTimeout(() => {
       setIsLoading(false);
@@ -84,15 +84,16 @@ export default function PlacementLoginPage() {
               <h1 className="text-2xl font-bold text-gray-900 mb-2">
                 Placement Login
               </h1>
-              <p className="text-gray-600">
-                Access your recruitment dashboard
-              </p>
+              <p className="text-gray-600">Access your recruitment dashboard</p>
             </div>
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Company Email
                 </label>
                 <input
@@ -108,7 +109,10 @@ export default function PlacementLoginPage() {
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Password
                 </label>
                 <input
@@ -129,7 +133,9 @@ export default function PlacementLoginPage() {
                     type="checkbox"
                     className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
                   />
-                  <span className="ml-2 text-sm text-gray-600">Remember me</span>
+                  <span className="ml-2 text-sm text-gray-600">
+                    Remember me
+                  </span>
                 </label>
                 <Link
                   href="/forgot-password"
@@ -159,9 +165,12 @@ export default function PlacementLoginPage() {
 
             {/* Additional Options */}
             <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-              <h3 className="text-sm font-medium text-gray-700 mb-2">New to our platform?</h3>
+              <h3 className="text-sm font-medium text-gray-700 mb-2">
+                New to our platform?
+              </h3>
               <p className="text-sm text-gray-600 mb-3">
-                Contact our team to set up your company&apos;s recruitment account
+                Contact our team to set up your company&apos;s recruitment
+                account
               </p>
               <Link
                 href="/contact-sales"

@@ -105,13 +105,12 @@ const HeroPage = memo(function HeroPage() {
               Welcome to
               <br />
               <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                Career Portal
+                Student Portal
               </span>
             </h1>
 
             <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-              Connect students with opportunities and help placements find the
-              perfect candidates
+              Upload your resume and get AI-powered feedback to enhance your career prospects
             </p>
           </motion.div>
 
@@ -120,32 +119,32 @@ const HeroPage = memo(function HeroPage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="flex flex-col sm:flex-row gap-6 justify-center items-center max-w-md mx-auto"
+            className="flex flex-col sm:flex-row justify-center items-center gap-6"
           >
             {/* Student Login Button */}
-            <Link href="/student-login" className="w-full sm:w-auto">
+            <Link href="/student-login">
               <motion.button
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
-                className="w-full px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 ease-out hover:from-blue-700 hover:to-purple-700 border-2 border-transparent hover:border-white/20"
+                className="px-12 py-5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 ease-out hover:from-blue-700 hover:to-purple-700 border-2 border-transparent hover:border-white/20"
               >
-                <div className="flex items-center justify-center gap-3">
-                  <span className="text-2xl">🎓</span>
-                  <span className="text-lg">Login as Student</span>
+                <div className="flex items-center justify-center gap-4">
+                  <span className="text-3xl">🎓</span>
+                  <span className="text-xl">Login as Student</span>
                 </div>
               </motion.button>
             </Link>
 
-            {/* Placement Login Button */}
-            <Link href="/placement-login" className="w-full sm:w-auto">
+            {/* Job List Button */}
+            <Link href="/job-list">
               <motion.button
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
-                className="w-full px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 ease-out hover:from-purple-700 hover:to-pink-700 border-2 border-transparent hover:border-white/20"
+                className="px-12 py-5 bg-gradient-to-r from-green-600 to-teal-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 ease-out hover:from-green-700 hover:to-teal-700 border-2 border-transparent hover:border-white/20"
               >
-                <div className="flex items-center justify-center gap-3">
-                  <span className="text-2xl">💼</span>
-                  <span className="text-lg">Login as Placement</span>
+                <div className="flex items-center justify-center gap-4">
+                  <span className="text-3xl">💼</span>
+                  <span className="text-xl">Job List</span>
                 </div>
               </motion.button>
             </Link>
@@ -159,8 +158,7 @@ const HeroPage = memo(function HeroPage() {
             className="mt-12 pt-8 border-t border-gray-200"
           >
             <p className="text-sm text-gray-500">
-              New to our platform? Contact your administrator for access
-              credentials
+              Ready to improve your resume? Sign in to get started with AI-powered analysis
             </p>
           </motion.div>
         </div>
