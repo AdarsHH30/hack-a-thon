@@ -1,0 +1,140 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{geometry}
+\usepackage{fontawesome5}
+\usepackage{titlesec}
+\usepackage{parskip}
+
+% Compact formatting
+\geometry{margin=0.5in}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{2pt}
+\setlist[itemize]{noitemsep, topsep=2pt, partopsep=0pt, leftmargin=*}
+
+% Section formatting
+\titlespacing{\section}{0pt}{6pt}{2pt}
+\titleformat{\section}{\normalfont\large\bfseries}{}{0pt}{}
+
+\begin{document}
+
+% ===================
+% Header - Compact
+% ===================
+\begin{center}
+{\LARGE \textbf{ {{ name | default("") | latex_escape }} }} \\[2pt]
+\small
+{% if address %}\faHome\ {{ address | latex_escape }} \, | \,{% endif %}
+{% if phone %}\faPhone\ {{ phone | latex_escape }} \, | \,{% endif %}
+{% if email %}\faEnvelope\ \href{mailto:{{ email | latex_escape }}}{ {{ email | latex_escape }} } \, | \,{% endif %}
+{% if linkedin %}\faLinkedin\ \href{ {{ linkedin | latex_escape }} }{LinkedIn} \, | \,{% endif %}
+{% if github %}\faGithub\ \href{ {{ github | latex_escape }} }{GitHub}{% endif %}
+\end{center}
+
+\vspace{4pt}
+\hrule
+\vspace{6pt}
+
+% ===================
+% Summary/Objective
+% ===================
+{% if summary %}
+\section*{Summary}
+{{ summary | latex_escape }}
+\vspace{6pt}
+\hrule
+\vspace{6pt}
+{% endif %}
+
+% ===================
+% Skills - Compact
+% ===================
+{% if skills %}
+\section*{Technical Skills}
+\begin{tabular}{@{}l@{}}
+{% for category, items in skills.items() %}
+\textbf{ {{ category | latex_escape }} }: {{ items | join(' | ') | latex_escape }} \\
+{% if not loop.last %} \vspace{2pt} \\ {% endif %}
+{% endfor %}
+\end{tabular}
+\vspace{6pt}
+\hrule
+\vspace{6pt}
+{% endif %}
+
+% ===================
+% Experience - Compact
+% ===================
+{% if experience %}
+\section*{Professional Experience}
+{% for exp in experience %}
+\textbf{ {{ exp.position | latex_escape }} } | {{ exp.company | latex_escape }} \hfill {{ exp.duration | latex_escape }} \\
+{% if exp.location %}\textit{ {{ exp.location | latex_escape }} } \\{% endif %}
+\begin{itemize}
+  {% for d in exp.details %}
+  \item {{ d | latex_escape }}
+  {% endfor %}
+\end{itemize}
+\vspace{2pt}
+{% endfor %}
+\vspace{6pt}
+\hrule
+\vspace{6pt}
+{% endif %}
+
+% ===================
+% Projects - Compact
+% ===================
+{% if projects %}
+\section*{Projects}
+{% for proj in projects %}
+\textbf{ {{ proj.name | latex_escape }} }{% if proj.tech %} | {{ proj.tech | latex_escape }}{% endif %} \hfill {{ proj.year | latex_escape }} \\
+{{ proj.description | latex_escape }} \\
+\vspace{2pt}
+{% endfor %}
+\vspace{6pt}
+\hrule
+\vspace{6pt}
+{% endif %}
+
+% ===================
+% Education - Compact
+% ===================
+{% if education %}
+\section*{Education}
+{% for edu in education %}
+\textbf{ {{ edu.degree | latex_escape }} } | {{ edu.institution | latex_escape }} \hfill {{ edu.year | default("") | latex_escape }} \\
+{% if edu.score %}\textit{ {{ edu.score | latex_escape }} } \\{% endif %}
+{% if edu.relevant_courses %}\textbf{Relevant Courses}: {{ edu.relevant_courses | join(', ') | latex_escape }} \\{% endif %}
+\vspace{2pt}
+{% endfor %}
+\vspace{6pt}
+\hrule
+\vspace{6pt}
+{% endif %}
+
+% ===================
+% Certifications - Compact
+% ===================
+{% if certifications %}
+\section*{Certifications}
+{% for cert in certifications %}
+- {{ cert | latex_escape }} \\
+{% endfor %}
+\vspace{6pt}
+\hrule
+\vspace{6pt}
+{% endif %}
+
+% ===================
+% Additional - Very Compact
+% ===================
+{% if additional %}
+\section*{Additional Information}
+{% if additional.languages %}\textbf{Languages}: {{ additional.languages | join(' | ') | latex_escape }} \\{% endif %}
+{% if additional.interests %}\textbf{Interests}: {{ additional.interests | join(', ') | latex_escape }}{% endif %}
+{% endif %}
+
+\end{document}
