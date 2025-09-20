@@ -1,9 +1,170 @@
+"use client";
+
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { GradientButton, OutlineButton } from "@/components/AnimatedButton";
 
 export default function Hero() {
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-      <div className="max-w-7xl w-full bg-white rounded-3xl shadow-xl overflow-hidden">
+    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden">
+      
+      {/* Animated Background Option 1: Glowing Gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+        <motion.div
+          className="absolute inset-0 bg-gradient-to-r from-blue-400/20 via-purple-400/20 to-pink-400/20"
+          animate={{
+            background: [
+              "linear-gradient(45deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1), rgba(236, 72, 153, 0.1))",
+              "linear-gradient(45deg, rgba(147, 51, 234, 0.15), rgba(236, 72, 153, 0.15), rgba(59, 130, 246, 0.15))",
+              "linear-gradient(45deg, rgba(236, 72, 153, 0.1), rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1))",
+              "linear-gradient(45deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1), rgba(236, 72, 153, 0.1))"
+            ]
+          }}
+          transition={{
+            duration: 8,
+            ease: "easeInOut",
+            repeat: Infinity,
+            repeatType: "loop"
+          }}
+        />
+        
+        {/* Glowing orbs */}
+        <motion.div
+          className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-300/30 rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.5, 0.3],
+          }}
+          transition={{
+            duration: 6,
+            ease: "easeInOut",
+            repeat: Infinity,
+          }}
+        />
+        <motion.div
+          className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple-300/30 rounded-full blur-3xl"
+          animate={{
+            scale: [1.2, 1, 1.2],
+            opacity: [0.4, 0.6, 0.4],
+          }}
+          transition={{
+            duration: 8,
+            ease: "easeInOut",
+            repeat: Infinity,
+            delay: 2
+          }}
+        />
+        <motion.div
+          className="absolute top-3/4 left-1/2 w-64 h-64 bg-pink-300/30 rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.3, 1],
+            opacity: [0.3, 0.4, 0.3],
+          }}
+          transition={{
+            duration: 7,
+            ease: "easeInOut",
+            repeat: Infinity,
+            delay: 4
+          }}
+        />
+      </div>
+
+      {/* Animated Background Option 2: SVG Grid */}
+      <div className="absolute inset-0 opacity-40">
+        <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <defs>
+            <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
+              <motion.path 
+                d="M 10 0 L 0 0 0 10" 
+                fill="none" 
+                stroke="rgba(99, 102, 241, 0.1)" 
+                strokeWidth="0.5"
+                initial={{ pathLength: 0, opacity: 0 }}
+                animate={{ pathLength: 1, opacity: [0, 0.5, 0] }}
+                transition={{
+                  duration: 4,
+                  ease: "easeInOut",
+                  repeat: Infinity,
+                  repeatType: "loop"
+                }}
+              />
+            </pattern>
+            <pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse">
+              <motion.circle 
+                cx="10" 
+                cy="10" 
+                r="1" 
+                fill="rgba(147, 51, 234, 0.2)"
+                animate={{
+                  r: [0.5, 1.5, 0.5],
+                  opacity: [0.1, 0.4, 0.1]
+                }}
+                transition={{
+                  duration: 3,
+                  ease: "easeInOut",
+                  repeat: Infinity,
+                  repeatType: "loop"
+                }}
+              />
+            </pattern>
+          </defs>
+          
+          <motion.rect 
+            width="100" 
+            height="100" 
+            fill="url(#grid)"
+            animate={{ opacity: [0.3, 0.6, 0.3] }}
+            transition={{
+              duration: 5,
+              ease: "easeInOut",
+              repeat: Infinity,
+            }}
+          />
+          <motion.rect 
+            width="100" 
+            height="100" 
+            fill="url(#dots)"
+            animate={{ opacity: [0.2, 0.5, 0.2] }}
+            transition={{
+              duration: 6,
+              ease: "easeInOut",
+              repeat: Infinity,
+              delay: 1
+            }}
+          />
+        </svg>
+      </div>
+
+      {/* Floating particles */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(15)].map((_, i) => (
+          <motion.div
+            key={i}
+            className={`absolute w-2 h-2 rounded-full ${
+              i % 3 === 0 ? 'bg-blue-300/30' : 
+              i % 3 === 1 ? 'bg-purple-300/30' : 'bg-pink-300/30'
+            }`}
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+            }}
+            animate={{
+              y: [-20, -100],
+              opacity: [0, 1, 0],
+              scale: [0, 1, 0],
+            }}
+            transition={{
+              duration: Math.random() * 3 + 4,
+              ease: "easeOut",
+              repeat: Infinity,
+              delay: Math.random() * 5,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Main Content */}
+      <div className="relative z-10 w-full max-w-7xl bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl overflow-hidden border border-white/20">
         <div className="grid lg:grid-cols-2 gap-0 items-center min-h-[600px]">
           {/* Left Content */}
           <div className="p-12 lg:p-16 space-y-8">
@@ -20,158 +181,308 @@ export default function Hero() {
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link
+            <div className="flex flex-col gap-4">
+              <GradientButton 
+                gradient="from-gray-800 to-gray-900"
                 href="/student"
-                className="inline-flex items-center justify-center px-8 py-3 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+                size="lg"
+                className="text-center"
               >
-                Upload Resume
-              </Link>
-              <Link
+                📄 Upload Resume
+              </GradientButton>
+              
+              <OutlineButton 
                 href="/recruiter"
-                className="inline-flex items-center justify-center px-8 py-3 border-2 border-red-500 text-red-500 bg-white font-semibold rounded-lg hover:bg-red-50 transition-colors"
+                size="lg"
+                className="border-2 border-red-500 text-red-500 hover:bg-red-50 text-center"
               >
-                Upload JD
-              </Link>
+                💼 Upload JD
+              </OutlineButton>
             </div>
           </div>
 
           {/* Right Illustration */}
-          <div className="relative p-8 lg:p-12 bg-gray-50">
-            <div className="relative w-full h-[500px] flex items-center justify-center">
+          <div className="relative p-12 bg-gray-50">
+            <motion.div 
+              className="relative w-full h-[500px] flex items-center justify-center"
+              animate={{
+                y: [0, -10, 0],
+                rotate: [0, 2, 0, -2, 0],
+              }}
+              transition={{
+                duration: 4,
+                ease: "easeInOut",
+                repeat: Infinity,
+                repeatType: "loop"
+              }}
+            >
               
               {/* Document Stack (Left) */}
-              <div className="absolute left-0 top-16">
+              <motion.div 
+                style={{ position: "absolute", left: "0", top: "4rem" }}
+                animate={{
+                  y: [0, -8, 0],
+                  x: [0, 2, 0]
+                }}
+                transition={{
+                  duration: 3.5,
+                  ease: "easeInOut",
+                  repeat: Infinity,
+                  repeatType: "loop",
+                  delay: 0.5
+                }}
+              >
                 <div className="relative">
                   {/* Multiple document papers stacked */}
-                  <div className="w-24 h-32 bg-white border border-gray-200 rounded-lg shadow-md transform -rotate-6">
-                    <div className="p-3 space-y-1">
+                  <div className="w-24 h-32 bg-white border border-gray-300 rounded-lg shadow-md transform -rotate-6">
+                    <div className="p-3 flex flex-col gap-1">
                       <div className="w-4 h-4 bg-orange-400 rounded-full"></div>
-                      <div className="space-y-1">
-                        <div className="h-1 bg-gray-300 rounded w-full"></div>
-                        <div className="h-1 bg-gray-300 rounded w-3/4"></div>
-                        <div className="h-1 bg-gray-300 rounded w-full"></div>
-                        <div className="h-1 bg-gray-300 rounded w-1/2"></div>
+                      <div className="flex flex-col gap-1">
+                        <div className="h-1 bg-gray-300 rounded-sm w-full"></div>
+                        <div className="h-1 bg-gray-300 rounded-sm w-3/4"></div>
+                        <div style={{ height: "0.25rem", backgroundColor: "#d1d5db", borderRadius: "0.125rem", width: "100%" }}></div>
+                        <div style={{ height: "0.25rem", backgroundColor: "#d1d5db", borderRadius: "0.125rem", width: "50%" }}></div>
                       </div>
                     </div>
                   </div>
-                  <div className="absolute top-2 left-2 w-24 h-32 bg-white border border-gray-200 rounded-lg shadow-md transform -rotate-3">
-                    <div className="p-3 space-y-1">
+                  
+                  {/* Second paper behind */}
+                  <div className="absolute top-2 left-2 w-24 h-32 bg-white border border-gray-300 rounded-lg shadow-md transform rotate-3">
+                    <div className="p-3 flex flex-col gap-1">
                       <div className="w-4 h-4 bg-blue-400 rounded-full"></div>
-                      <div className="space-y-1">
-                        <div className="h-1 bg-gray-300 rounded w-full"></div>
-                        <div className="h-1 bg-gray-300 rounded w-3/4"></div>
-                        <div className="h-1 bg-gray-300 rounded w-full"></div>
+                      <div className="flex flex-col gap-1">
+                        <div className="h-1 bg-gray-300 rounded-sm w-full"></div>
+                        <div className="h-1 bg-gray-300 rounded-sm w-3/4"></div>
+                        <div className="h-1 bg-gray-300 rounded-sm w-full"></div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Central AI Circuit */}
-              <div className="relative z-10">
-                <div className="w-40 h-40 bg-gray-900 rounded-2xl flex items-center justify-center relative overflow-hidden">
-                  {/* Circuit pattern background */}
-                  <div className="absolute inset-0 opacity-30">
-                    <svg className="w-full h-full" viewBox="0 0 100 100">
-                      <pattern id="circuit" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-                        <path d="M0 10 L20 10 M10 0 L10 20" stroke="#4ade80" strokeWidth="0.5" fill="none"/>
-                        <circle cx="10" cy="10" r="1" fill="#4ade80"/>
-                      </pattern>
-                      <rect width="100" height="100" fill="url(#circuit)"/>
-                    </svg>
-                  </div>
-                  
+              <motion.div 
+                style={{ position: "relative", zIndex: "10" }}
+                animate={{
+                  rotate: [0, 3, 0, -3, 0],
+                  scale: [1, 1.02, 1]
+                }}
+                transition={{
+                  duration: 5,
+                  ease: "easeInOut",
+                  repeat: Infinity,
+                  repeatType: "loop"
+                }}
+              >
+                <div style={{ 
+                  width: "10rem", 
+                  height: "10rem", 
+                  backgroundColor: "#111827", 
+                  borderRadius: "1rem", 
+                  display: "flex", 
+                  alignItems: "center", 
+                  justifyContent: "center", 
+                  position: "relative", 
+                  overflow: "hidden" 
+                }}>
                   {/* AI Text */}
-                  <div className="relative z-10 text-white text-4xl font-bold">AI</div>
+                  <div style={{ 
+                    position: "relative", 
+                    zIndex: "10", 
+                    color: "white", 
+                    fontSize: "2.5rem", 
+                    fontWeight: "bold" 
+                  }}>AI</div>
                   
                   {/* Connection points */}
-                  <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-red-500 rounded-full"></div>
-                  <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-red-500 rounded-full"></div>
+                  <div style={{ 
+                    position: "absolute", 
+                    top: "-0.5rem", 
+                    left: "50%", 
+                    transform: "translateX(-50%)", 
+                    width: "1rem", 
+                    height: "1rem", 
+                    backgroundColor: "#ef4444", 
+                    borderRadius: "50%" 
+                  }}></div>
+                  <div style={{ 
+                    position: "absolute", 
+                    bottom: "-0.5rem", 
+                    left: "50%", 
+                    transform: "translateX(-50%)", 
+                    width: "1rem", 
+                    height: "1rem", 
+                    backgroundColor: "#ef4444", 
+                    borderRadius: "50%" 
+                  }}></div>
                   <div className="absolute -left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 bg-red-500 rounded-full"></div>
                   <div className="absolute -right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 bg-red-500 rounded-full"></div>
                 </div>
 
                 {/* Floating elements around AI */}
-                <div className="absolute -top-8 -left-8 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center border">
-                  <div className="w-6 h-6 bg-gray-400 rounded-full"></div>
-                </div>
-                <div className="absolute -top-8 -right-8 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center border">
-                  <div className="w-6 h-6 bg-gray-400 rounded-full"></div>
-                </div>
-                <div className="absolute -bottom-8 -left-8 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center border">
-                  <div className="w-6 h-6 bg-gray-400 rounded-full"></div>
-                </div>
-                <div className="absolute -bottom-8 -right-8 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center border">
-                  <div className="w-6 h-6 bg-gray-400 rounded-full"></div>
-                </div>
-              </div>
+                <motion.div 
+                  className="absolute -top-8 -left-8 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center border border-gray-300"
+                  animate={{
+                    y: [0, -5, 0],
+                    rotate: [0, 5, 0]
+                  }}
+                  transition={{
+                    duration: 2.8,
+                    ease: "easeInOut",
+                    repeat: Infinity,
+                    repeatType: "loop",
+                    delay: 0.2
+                  }}
+                >
+                  <div style={{ width: "1.5rem", height: "1.5rem", backgroundColor: "#9ca3af", borderRadius: "50%" }}></div>
+                </motion.div>
+                <motion.div 
+                  style={{ 
+                    position: "absolute", 
+                    top: "-2rem", 
+                    right: "-2rem", 
+                    width: "3rem", 
+                    height: "3rem", 
+                    backgroundColor: "white", 
+                    borderRadius: "50%", 
+                    boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)", 
+                    display: "flex", 
+                    alignItems: "center", 
+                    justifyContent: "center", 
+                    border: "1px solid #e5e7eb" 
+                  }}
+                  animate={{
+                    y: [0, -4, 0],
+                    x: [0, 2, 0]
+                  }}
+                  transition={{
+                    duration: 3.2,
+                    ease: "easeInOut",
+                    repeat: Infinity,
+                    repeatType: "loop",
+                    delay: 0.8
+                  }}
+                >
+                  <div style={{ width: "1.5rem", height: "1.5rem", backgroundColor: "#9ca3af", borderRadius: "50%" }}></div>
+                </motion.div>
+                <motion.div 
+                  style={{ 
+                    position: "absolute", 
+                    bottom: "-2rem", 
+                    left: "-2rem", 
+                    width: "3rem", 
+                    height: "3rem", 
+                    backgroundColor: "white", 
+                    borderRadius: "50%", 
+                    boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)", 
+                    display: "flex", 
+                    alignItems: "center", 
+                    justifyContent: "center", 
+                    border: "1px solid #e5e7eb" 
+                  }}
+                  animate={{
+                    y: [0, -3, 0],
+                    rotate: [0, -4, 0]
+                  }}
+                  transition={{
+                    duration: 2.5,
+                    ease: "easeInOut",
+                    repeat: Infinity,
+                    repeatType: "loop",
+                    delay: 1.2
+                  }}
+                >
+                  <div style={{ width: "1.5rem", height: "1.5rem", backgroundColor: "#9ca3af", borderRadius: "50%" }}></div>
+                </motion.div>
+                <motion.div 
+                  style={{ 
+                    position: "absolute", 
+                    bottom: "-2rem", 
+                    right: "-2rem", 
+                    width: "3rem", 
+                    height: "3rem", 
+                    backgroundColor: "white", 
+                    borderRadius: "50%", 
+                    boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)", 
+                    display: "flex", 
+                    alignItems: "center", 
+                    justifyContent: "center", 
+                    border: "1px solid #e5e7eb" 
+                  }}
+                  animate={{
+                    y: [0, -6, 0],
+                    x: [0, -2, 0]
+                  }}
+                  transition={{
+                    duration: 3.8,
+                    ease: "easeInOut",
+                    repeat: Infinity,
+                    repeatType: "loop",
+                    delay: 0.6
+                  }}
+                >
+                  <div style={{ width: "1.5rem", height: "1.5rem", backgroundColor: "#9ca3af", borderRadius: "50%" }}></div>
+                </motion.div>
+              </motion.div>
 
               {/* Dashboard Cards (Right) */}
-              <div className="absolute right-0 top-8 space-y-4">
+              <motion.div 
+                style={{ position: "absolute", right: "0", top: "2rem", display: "flex", flexDirection: "column", gap: "1rem" }}
+                animate={{
+                  y: [0, -6, 0],
+                  x: [0, -3, 0]
+                }}
+                transition={{
+                  duration: 4.2,
+                  ease: "easeInOut",
+                  repeat: Infinity,
+                  repeatType: "loop",
+                  delay: 1
+                }}
+              >
                 {/* Top Dashboard */}
-                <div className="w-32 h-24 bg-white rounded-lg shadow-lg border p-3">
-                  <div className="text-xs font-semibold text-gray-700 mb-2">Dashboard</div>
-                  <div className="flex items-center space-x-1">
-                    <div className="w-4 h-4 bg-gray-300 rounded-full"></div>
-                    <div className="flex-1 space-y-1">
-                      <div className="h-1 bg-gray-200 rounded"></div>
-                      <div className="h-1 bg-gray-200 rounded w-3/4"></div>
+                <div style={{ 
+                  width: "8rem", 
+                  height: "6rem", 
+                  backgroundColor: "white", 
+                  borderRadius: "0.5rem", 
+                  boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)", 
+                  border: "1px solid #e5e7eb", 
+                  padding: "0.75rem" 
+                }}>
+                  <div style={{ fontSize: "0.75rem", fontWeight: "600", color: "#374151", marginBottom: "0.5rem" }}>Dashboard</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                    <div style={{ width: "1rem", height: "1rem", backgroundColor: "#d1d5db", borderRadius: "50%" }}></div>
+                    <div style={{ flex: "1", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                      <div style={{ height: "0.25rem", backgroundColor: "#e5e7eb", borderRadius: "0.125rem" }}></div>
+                      <div style={{ height: "0.25rem", backgroundColor: "#e5e7eb", borderRadius: "0.125rem", width: "75%" }}></div>
                     </div>
                   </div>
                 </div>
 
                 {/* Analytics Dashboard */}
-                <div className="w-32 h-28 bg-gray-900 rounded-lg shadow-lg p-3">
-                  <div className="text-xs font-semibold text-white mb-2">Analytics</div>
-                  <div className="space-y-1">
-                    <div className="flex justify-between items-end space-x-1">
-                      <div className="w-2 h-4 bg-red-500 rounded-sm"></div>
-                      <div className="w-2 h-6 bg-red-500 rounded-sm"></div>
-                      <div className="w-2 h-3 bg-red-500 rounded-sm"></div>
-                      <div className="w-2 h-5 bg-red-500 rounded-sm"></div>
+                <div style={{ 
+                  width: "8rem", 
+                  height: "7rem", 
+                  backgroundColor: "#111827", 
+                  borderRadius: "0.5rem", 
+                  boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)", 
+                  padding: "0.75rem" 
+                }}>
+                  <div style={{ fontSize: "0.75rem", fontWeight: "600", color: "white", marginBottom: "0.5rem" }}>Analytics</div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: "0.25rem" }}>
+                      <div style={{ width: "0.5rem", height: "1rem", backgroundColor: "#ef4444", borderRadius: "0.125rem" }}></div>
+                      <div style={{ width: "0.5rem", height: "1.5rem", backgroundColor: "#ef4444", borderRadius: "0.125rem" }}></div>
+                      <div style={{ width: "0.5rem", height: "0.75rem", backgroundColor: "#ef4444", borderRadius: "0.125rem" }}></div>
+                      <div style={{ width: "0.5rem", height: "1.25rem", backgroundColor: "#ef4444", borderRadius: "0.125rem" }}></div>
                     </div>
-                    <div className="w-full h-1 bg-gray-700 rounded"></div>
+                    <div style={{ width: "100%", height: "0.25rem", backgroundColor: "#374151", borderRadius: "0.125rem" }}></div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
 
-              {/* Additional floating documents */}
-              <div className="absolute top-4 left-1/4 w-20 h-26 bg-white rounded-lg shadow-md transform rotate-12 border">
-                <div className="p-2 space-y-1">
-                  <div className="w-3 h-3 bg-blue-400 rounded-full"></div>
-                  <div className="space-y-1">
-                    <div className="h-0.5 bg-gray-300 rounded w-full"></div>
-                    <div className="h-0.5 bg-gray-300 rounded w-2/3"></div>
-                    <div className="h-0.5 bg-gray-300 rounded w-full"></div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="absolute bottom-16 left-1/4 w-20 h-26 bg-white rounded-lg shadow-md transform -rotate-6 border">
-                <div className="p-2 space-y-1">
-                  <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-                  <div className="space-y-1">
-                    <div className="h-0.5 bg-gray-300 rounded w-full"></div>
-                    <div className="h-0.5 bg-gray-300 rounded w-3/4"></div>
-                    <div className="h-0.5 bg-gray-300 rounded w-full"></div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Connection lines */}
-              <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 400 400">
-                <defs>
-                  <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#ef4444" stopOpacity="0.6"/>
-                    <stop offset="100%" stopColor="#f97316" stopOpacity="0.3"/>
-                  </linearGradient>
-                </defs>
-                <path d="M100 100 Q200 200 300 100" stroke="url(#lineGrad)" strokeWidth="2" fill="none" strokeDasharray="5,5"/>
-                <path d="M100 300 Q200 200 300 300" stroke="url(#lineGrad)" strokeWidth="2" fill="none" strokeDasharray="5,5"/>
-                <path d="M50 200 Q200 150 350 200" stroke="url(#lineGrad)" strokeWidth="2" fill="none" strokeDasharray="5,5"/>
-              </svg>
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>
