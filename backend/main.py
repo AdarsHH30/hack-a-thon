@@ -15,7 +15,6 @@ app.add_middleware(
 
 app.include_router(job_router, prefix="/api/jobs", tags=["jobs"])
 app.include_router(pdf_router, prefix="/api/pdf", tags=["pdf"])
-app.include_router(enhanced_pdf_router, prefix="/api/v2/pdf", tags=["enhanced-pdf"])
 
 
 @app.get("/")

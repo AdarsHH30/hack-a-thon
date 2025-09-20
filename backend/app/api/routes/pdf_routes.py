@@ -1,7 +1,16 @@
-from fastapi import APIRouter, File, UploadFile, HTTPException
+from fastapi import APIRouter, File, UploadFile, HTTPException, Form
 from datetime import datetime
 from typing import Optional
 import os
+import tempfile
+import sys
+from pathlib import Path
+
+# Add the services path to import modules
+sys.path.append(str(Path(__file__).parent.parent.parent))
+
+from app.services.main import PDFExtractionService, extract_pdf_file
+from app.services.clean_data.clean import clean_resume_text, clean_job_description_text
 
 router = APIRouter()
 
@@ -130,3 +139,159 @@ async def process_pdf(file_id: int):
         "result": processing_result,
         "timestamp": datetime.now().isoformat(),
     }
+
+
+@router.post("/process-complete-pdf")
+async def process_complete_pdf(
+    file: UploadFile = File(...), document_type: str = Form(default="resume")
+):
+    """
+    Complete PDF processing: Extract text + Clean data in route layer
+    """
+    if not file.filename.endswith(".pdf"):
+        raise HTTPException(status_code=400, detail="Only PDF files are allowed")
+
+    if not file.content_type == "application/pdf":
+        raise HTTPException(
+            status_code=400, detail="Invalid file type. Please upload a PDF file"
+        )
+
+    if document_type not in ["resume", "job_description"]:
+        raise HTTPException(
+            status_code=400,
+            detail="Document type must be 'resume' or 'job_description'",
+        )
+
+    try:
+        # Save uploaded file temporarily
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
+            content = await file.read()
+            temp_file.write(content)
+            temp_file_path = temp_file.name
+
+        try:
+            # Stage 1: Extract text using service layer
+            print(f"🔍 Extracting text from {file.filename}...")
+            extraction_service = PDFExtractionService()
+            extraction_result = extraction_service.extract_pdf_text(temp_file_path)
+
+            if not extraction_result.get("success", False):
+                return {
+                    "success": False,
+                    "error": f"PDF extraction failed: {extraction_result.get('error')}",
+                    "stage": "extraction",
+                    "filename": file.filename,
+                    "timestamp": datetime.now().isoformat(),
+                }
+
+            raw_text = extraction_result.get("raw_text", "")
+            if not raw_text.strip():
+                return {
+                    "success": False,
+                    "error": "No text content found in PDF",
+                    "stage": "extraction",
+                    "filename": file.filename,
+                    "timestamp": datetime.now().isoformat(),
+                }
+
+            print(f"✅ Text extracted. Length: {len(raw_text)} characters")
+
+            # Stage 2: Clean data using cleaning functions directly in route
+            print(f"🤖 Cleaning {document_type} data...")
+
+            if document_type == "resume":
+                cleaning_result = clean_resume_text(raw_text)
+            else:  # job_description
+                cleaning_result = clean_job_description_text(raw_text)
+
+            if not cleaning_result.get("success", False):
+                return {
+                    "success": False,
+                    "error": f"Data cleaning failed: {cleaning_result.get('error')}",
+                    "stage": "cleaning",
+                    "filename": file.filename,
+                    "extraction_data": extraction_result,
+                    "timestamp": datetime.now().isoformat(),
+                }
+
+            print("✅ Data cleaned and structured successfully")
+
+            # Combine results
+            final_result = {
+                "success": True,
+                "filename": file.filename,
+                "document_type": document_type,
+                "document_info": extraction_result.get("document_info", {}),
+                "structured_data": cleaning_result.get("structured_data", {}),
+                "raw_text": raw_text,
+                "processing_stages": {"extraction": "success", "cleaning": "success"},
+                "processed_at": datetime.now().isoformat(),
+            }
+
+            print("🎉 Complete PDF processing finished successfully!")
+            return final_result
+
+        finally:
+            # Clean up temporary file
+            if os.path.exists(temp_file_path):
+                os.unlink(temp_file_path)
+
+    except Exception as e:
+        # Clean up temporary file in case of error
+        if "temp_file_path" in locals() and os.path.exists(temp_file_path):
+            os.unlink(temp_file_path)
+
+        raise HTTPException(status_code=500, detail=f"Error processing PDF: {str(e)}")
+
+
+@router.post("/extract-text-only")
+async def extract_text_only(file: UploadFile = File(...)):
+    """
+    Extract text from PDF without cleaning (using service layer only)
+    """
+    if not file.filename.endswith(".pdf"):
+        raise HTTPException(status_code=400, detail="Only PDF files are allowed")
+
+    if not file.content_type == "application/pdf":
+        raise HTTPException(
+            status_code=400, detail="Invalid file type. Please upload a PDF file"
+        )
+
+    try:
+        # Save uploaded file temporarily
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
+            content = await file.read()
+            temp_file.write(content)
+            temp_file_path = temp_file.name
+
+        try:
+            # Extract text using service layer
+            print(f"🔍 Extracting text from {file.filename}...")
+            extraction_result = extract_pdf_file(temp_file_path)
+
+            if extraction_result.get("success", False):
+                extraction_result["filename"] = file.filename
+                extraction_result["processed_at"] = datetime.now().isoformat()
+                print("✅ Text extraction completed successfully!")
+                return extraction_result
+            else:
+                return {
+                    "success": False,
+                    "error": extraction_result.get("error", "Unknown error"),
+                    "filename": file.filename,
+                    "timestamp": datetime.now().isoformat(),
+                }
+
+        finally:
+            # Clean up temporary file
+            if os.path.exists(temp_file_path):
+                os.unlink(temp_file_path)
+
+    except Exception as e:
+        # Clean up temporary file in case of error
+        if "temp_file_path" in locals() and os.path.exists(temp_file_path):
+            os.unlink(temp_file_path)
+
+        raise HTTPException(
+            status_code=500, detail=f"Error extracting text from PDF: {str(e)}"
+        )
