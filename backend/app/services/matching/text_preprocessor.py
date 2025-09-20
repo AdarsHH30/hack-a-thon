@@ -8,8 +8,213 @@ import string
 from typing import List, Set, Dict, Any
 import nltk
 from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
+from nltk.tokenize import word_tokenize, RegexpTokenizer
 from nltk.stem import PorterStemmer, WordNetLemmatizer
+
+
+# Download NLTK data once at module level for efficiency
+def _ensure_nltk_data():
+    """Ensure required NLTK data is downloaded"""
+    try:
+        nltk.data.find("tokenizers/punkt")
+    except LookupError:
+        nltk.download("punkt", quiet=True)
+
+    try:
+        nltk.data.find("corpora/stopwords")
+    except LookupError:
+        nltk.download("stopwords", quiet=True)
+
+    try:
+        nltk.data.find("corpora/wordnet")
+    except LookupError:
+        nltk.download("wordnet", quiet=True)
+
+
+# Download data once when module is imported
+_ensure_nltk_data()
+
+# Cache stopwords for efficiency
+_cached_stop_words = set(stopwords.words("english"))
+_domain_stopwords = {
+    "experience",
+    "years",
+    "year",
+    "work",
+    "working",
+    "job",
+    "position",
+    "role",
+    "responsibilities",
+    "responsible",
+    "including",
+    "company",
+    "team",
+    "teams",
+    "project",
+    "projects",
+    "skills",
+    "skill",
+    "knowledge",
+    "ability",
+    "able",
+    "requirements",
+    "required",
+    "preferred",
+    "plus",
+    "nice",
+    "have",
+    "must",
+    "should",
+    "candidate",
+    "candidates",
+    "applicant",
+    "applicants",
+}
+_cached_stop_words.update(_domain_stopwords)
+
+# Cache skills sets for faster lookups
+_SKILLS_SETS = {
+    "programming_languages": {
+        "python",
+        "java",
+        "javascript",
+        "typescript",
+        "cplusplus",
+        "csharp",
+        "php",
+        "ruby",
+        "go",
+        "rust",
+        "scala",
+        "kotlin",
+        "swift",
+        "r",
+        "matlab",
+        "sql",
+        "html",
+        "css",
+        "shell",
+        "bash",
+        "powershell",
+    },
+    "frameworks": {
+        "react",
+        "reactjs",
+        "angular",
+        "vue",
+        "vuejs",
+        "django",
+        "flask",
+        "fastapi",
+        "express",
+        "nodejs",
+        "spring",
+        "hibernate",
+        "bootstrap",
+        "jquery",
+        "tensorflow",
+        "pytorch",
+        "keras",
+        "scikit-learn",
+        "pandas",
+        "numpy",
+        "matplotlib",
+        "seaborn",
+        "plotly",
+    },
+    "databases": {
+        "mysql",
+        "postgresql",
+        "mongodb",
+        "redis",
+        "elasticsearch",
+        "sqlite",
+        "oracle",
+        "sqlserver",
+        "dynamodb",
+        "cassandra",
+        "firebase",
+        "cosmos",
+        "mariadb",
+    },
+    "cloud_platforms": {
+        "aws",
+        "azure",
+        "gcp",
+        "docker",
+        "kubernetes",
+        "terraform",
+        "ansible",
+        "jenkins",
+        "gitlab",
+        "github",
+        "bitbucket",
+        "cloudformation",
+        "helm",
+        "prometheus",
+        "grafana",
+    },
+    "tools": {
+        "git",
+        "jira",
+        "confluence",
+        "slack",
+        "teams",
+        "zoom",
+        "postman",
+        "swagger",
+        "figma",
+        "sketch",
+        "photoshop",
+        "illustrator",
+        "tableau",
+        "powerbi",
+        "excel",
+        "word",
+    },
+    "data_science": {
+        "pandas",
+        "numpy",
+        "scipy",
+        "matplotlib",
+        "seaborn",
+        "plotly",
+        "bokeh",
+        "scikit-learn",
+        "sklearn",
+        "tensorflow",
+        "keras",
+        "pytorch",
+        "jax",
+        "xgboost",
+        "lightgbm",
+        "catboost",
+        "opencv",
+        "pillow",
+        "imageio",
+        "jupyter",
+        "notebook",
+        "ipython",
+        "anaconda",
+        "conda",
+        "pip",
+        "spark",
+        "pyspark",
+        "hadoop",
+        "hive",
+        "pig",
+        "kafka",
+        "storm",
+        "airflow",
+        "luigi",
+        "prefect",
+        "dask",
+        "ray",
+        "mlflow",
+        "kubeflow",
+    },
+}
 
 
 class TextPreprocessor:
@@ -20,64 +225,10 @@ class TextPreprocessor:
     def __init__(self):
         self.stemmer = PorterStemmer()
         self.lemmatizer = WordNetLemmatizer()
-        self._download_nltk_data()
-        self.stop_words = set(stopwords.words("english"))
-
-        # Add domain-specific stopwords
-        self.stop_words.update(
-            [
-                "experience",
-                "years",
-                "year",
-                "work",
-                "working",
-                "job",
-                "position",
-                "role",
-                "responsibilities",
-                "responsible",
-                "including",
-                "company",
-                "team",
-                "teams",
-                "project",
-                "projects",
-                "skills",
-                "skill",
-                "knowledge",
-                "ability",
-                "able",
-                "requirements",
-                "required",
-                "preferred",
-                "plus",
-                "nice",
-                "have",
-                "must",
-                "should",
-                "candidate",
-                "candidates",
-                "applicant",
-                "applicants",
-            ]
-        )
-
-    def _download_nltk_data(self):
-        """Download required NLTK data if not already present"""
-        try:
-            nltk.data.find("tokenizers/punkt")
-        except LookupError:
-            nltk.download("punkt", quiet=True)
-
-        try:
-            nltk.data.find("corpora/stopwords")
-        except LookupError:
-            nltk.download("stopwords", quiet=True)
-
-        try:
-            nltk.data.find("corpora/wordnet")
-        except LookupError:
-            nltk.download("wordnet", quiet=True)
+        # Use faster regex tokenizer
+        self.tokenizer = RegexpTokenizer(r"\w+")
+        # Use cached stopwords
+        self.stop_words = _cached_stop_words.copy()
 
     def clean_text(self, text: str) -> str:
         """
@@ -130,8 +281,8 @@ class TextPreprocessor:
         # Clean text first
         text = self.clean_text(text)
 
-        # Tokenize
-        tokens = word_tokenize(text)
+        # Tokenize using faster regex tokenizer
+        tokens = self.tokenizer.tokenize(text)
 
         # Filter tokens
         filtered_tokens = []
@@ -165,118 +316,15 @@ class TextPreprocessor:
         # Clean and tokenize
         tokens = self.tokenize_and_filter(text, remove_stopwords=True)
 
-        # Technical patterns
-        tech_patterns = {
-            "programming_languages": [
-                "python",
-                "java",
-                "javascript",
-                "typescript",
-                "cplusplus",
-                "csharp",
-                "php",
-                "ruby",
-                "go",
-                "rust",
-                "scala",
-                "kotlin",
-                "swift",
-                "r",
-                "matlab",
-                "sql",
-                "html",
-                "css",
-                "shell",
-                "bash",
-                "powershell",
-            ],
-            "frameworks": [
-                "react",
-                "reactjs",
-                "angular",
-                "vue",
-                "vuejs",
-                "django",
-                "flask",
-                "fastapi",
-                "express",
-                "nodejs",
-                "spring",
-                "hibernate",
-                "bootstrap",
-                "jquery",
-                "tensorflow",
-                "pytorch",
-                "keras",
-                "scikit-learn",
-                "pandas",
-                "numpy",
-                "matplotlib",
-                "seaborn",
-                "plotly",
-            ],
-            "databases": [
-                "mysql",
-                "postgresql",
-                "mongodb",
-                "redis",
-                "elasticsearch",
-                "sqlite",
-                "oracle",
-                "sqlserver",
-                "dynamodb",
-                "cassandra",
-                "firebase",
-                "cosmos",
-                "mariadb",
-            ],
-            "cloud_platforms": [
-                "aws",
-                "azure",
-                "gcp",
-                "docker",
-                "kubernetes",
-                "terraform",
-                "ansible",
-                "jenkins",
-                "gitlab",
-                "github",
-                "bitbucket",
-                "cloudformation",
-                "helm",
-                "prometheus",
-                "grafana",
-            ],
-            "tools": [
-                "git",
-                "jira",
-                "confluence",
-                "slack",
-                "teams",
-                "zoom",
-                "postman",
-                "swagger",
-                "figma",
-                "sketch",
-                "photoshop",
-                "illustrator",
-                "tableau",
-                "powerbi",
-                "excel",
-                "word",
-            ],
-        }
-
-        # Find matches
-        found_skills = {category: [] for category in tech_patterns.keys()}
-
-        # Add general skills category
+        # Use cached skills sets for faster lookups
+        found_skills = {category: [] for category in _SKILLS_SETS.keys()}
         found_skills["general_keywords"] = []
 
-        # Check for technical skills
+        # Check for technical skills using set lookups (O(1))
         for token in tokens:
-            for category, skills_list in tech_patterns.items():
-                if token.lower() in skills_list:
+            token_lower = token.lower()
+            for category, skills_set in _SKILLS_SETS.items():
+                if token_lower in skills_set:
                     found_skills[category].append(token)
 
             # Add to general keywords if it's not a common word

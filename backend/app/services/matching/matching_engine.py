@@ -4,9 +4,14 @@ Combines text preprocessing, hard matching, and semantic matching with configura
 """
 
 import json
+import os
+import logging
 from typing import Dict, Any, List, Optional, Tuple
 from datetime import datetime
 from pathlib import Path
+
+# Set up logging
+logger = logging.getLogger(__name__)
 
 # Import our matching modules
 try:
@@ -36,6 +41,43 @@ class MatchingEngine:
     Complete resume-job matching engine with configurable scoring and verdict system
     """
 
+    @staticmethod
+    def _load_config_from_env() -> Dict[str, Any]:
+        """Load configuration from environment variables"""
+        config = {}
+
+        # Weights
+        if os.getenv("MATCHING_SEMANTIC_WEIGHT"):
+            config.setdefault("weights", {})["semantic_weight"] = float(
+                os.getenv("MATCHING_SEMANTIC_WEIGHT")
+            )
+        if os.getenv("MATCHING_HARD_WEIGHT"):
+            config.setdefault("weights", {})["hard_match_weight"] = float(
+                os.getenv("MATCHING_HARD_WEIGHT")
+            )
+
+        # Thresholds
+        if os.getenv("MATCHING_HIGH_THRESHOLD"):
+            config.setdefault("thresholds", {})["high_suitability"] = float(
+                os.getenv("MATCHING_HIGH_THRESHOLD")
+            )
+        if os.getenv("MATCHING_MEDIUM_THRESHOLD"):
+            config.setdefault("thresholds", {})["medium_suitability"] = float(
+                os.getenv("MATCHING_MEDIUM_THRESHOLD")
+            )
+
+        # Other settings
+        if os.getenv("MATCHING_FUZZY_THRESHOLD"):
+            config["fuzzy_threshold"] = int(os.getenv("MATCHING_FUZZY_THRESHOLD"))
+        if os.getenv("MATCHING_SEMANTIC_MODEL"):
+            config["semantic_model"] = os.getenv("MATCHING_SEMANTIC_MODEL")
+        if os.getenv("MATCHING_ENABLE_CACHING"):
+            config["enable_caching"] = (
+                os.getenv("MATCHING_ENABLE_CACHING").lower() == "true"
+            )
+
+        return config
+
     def __init__(self, config: Optional[Dict[str, Any]] = None):
         """
         Initialize matching engine with configuration
@@ -57,16 +99,22 @@ class MatchingEngine:
             "semantic_model": "all-MiniLM-L6-v2",
         }
 
-        # Update with user config
+        # Load from environment variables first
+        env_config = self._load_config_from_env()
+        self.config.update(env_config)
+
+        # Update with user config (overrides env vars)
         if config:
             self.config.update(config)
 
-        # Initialize components
+        # Initialize components once for reuse
         self.text_preprocessor = TextPreprocessor()
         self.hard_matcher = HardMatcher(fuzzy_threshold=self.config["fuzzy_threshold"])
         self.semantic_matcher = SemanticMatcher(
             model_name=self.config["semantic_model"]
         )
+
+        logger.info(f"MatchingEngine initialized with config: {self.config}")
 
     def _ensure_json_serializable(self, data):
         """Convert numpy types and other non-serializable types to JSON-compatible types"""
@@ -120,11 +168,16 @@ class MatchingEngine:
             print(
                 f"✅ Preprocessing completed. Resume: {resume_data['total_tokens']} tokens, JD: {jd_data['total_tokens']} tokens"
             )
+            print(f"🔍 Resume skills found: {resume_data['skills_data']}")
+            print(f"🔍 JD skills found: {jd_data['skills_data']}")
+            print(
+                f"📝 Resume semantic text preview: {resume_data['semantic_text'][:200]}..."
+            )
+            print(f"📝 JD semantic text preview: {jd_data['semantic_text'][:200]}...")
 
             # Step 2: Hard Matching
             print("🔍 Step 2: Performing hard matching (keywords & skills)...")
-            hard_matcher = HardMatcher()
-            hard_match_results = hard_matcher.comprehensive_hard_match(
+            hard_match_results = self.hard_matcher.comprehensive_hard_match(
                 resume_data, jd_data
             )
             hard_match_score = float(
@@ -135,7 +188,7 @@ class MatchingEngine:
 
             # Step 3: Semantic Matching
             print("🤖 Step 3: Performing semantic matching...")
-            semantic_results = calculate_semantic_similarity(
+            semantic_results = self.semantic_matcher.semantic_match_detailed(
                 resume_data["semantic_text"], jd_data["semantic_text"]
             )
             semantic_score = float(
@@ -143,6 +196,12 @@ class MatchingEngine:
             )  # Ensure Python float
 
             print(f"✅ Semantic matching completed. Score: {semantic_score}%")
+            print(
+                f"🎯 Semantic details: Overall={semantic_results['overall_similarity']}%, Model={semantic_results['model_used']}, Confidence={semantic_results['confidence']}"
+            )
+            print(
+                f"📊 Section similarities: {semantic_results['section_similarities']}"
+            )
 
             # Step 4: Calculate Final Score
             print("📊 Step 4: Calculating final score...")
@@ -175,6 +234,7 @@ class MatchingEngine:
 
         except Exception as e:
             error_msg = f"Error in matching pipeline: {str(e)}"
+            logger.error(error_msg, exc_info=True)
             print(f"❌ {error_msg}")
             return self._create_error_result(error_msg)
 
@@ -479,6 +539,21 @@ class MatchingEngine:
         return self.config.copy()
 
 
+# Global engine cache for performance
+_ENGINE_CACHE = {}
+
+
+def _get_engine(config: Optional[Dict[str, Any]] = None) -> MatchingEngine:
+    """Get or create a cached MatchingEngine instance"""
+    # Create a cache key from config
+    config_key = json.dumps(config or {}, sort_keys=True) if config else "default"
+
+    if config_key not in _ENGINE_CACHE:
+        _ENGINE_CACHE[config_key] = MatchingEngine(config)
+
+    return _ENGINE_CACHE[config_key]
+
+
 # Convenience functions
 def match_resume_to_job(
     resume_text: str, job_description_text: str, config: Optional[Dict[str, Any]] = None
@@ -494,7 +569,7 @@ def match_resume_to_job(
     Returns:
         Dict with matching results
     """
-    engine = MatchingEngine(config)
+    engine = _get_engine(config)
     return engine.match_resume_to_job(resume_text, job_description_text)
 
 
@@ -514,7 +589,7 @@ def batch_match_jobs(
     Returns:
         List of matching results
     """
-    engine = MatchingEngine(config)
+    engine = _get_engine(config)
     return engine.batch_match(resume_text, job_descriptions)
 
 

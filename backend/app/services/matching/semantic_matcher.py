@@ -24,6 +24,10 @@ try:
 except ImportError:
     SKLEARN_AVAILABLE = False
 
+# Global model cache for efficiency
+_MODEL_CACHE = {}
+_TFIDF_CACHE = {}
+
 
 class SemanticMatcher:
     """
@@ -44,23 +48,28 @@ class SemanticMatcher:
         self.cache_dir = cache_dir or str(Path(__file__).parent / "cache")
         Path(self.cache_dir).mkdir(exist_ok=True)
 
+        # Lazy loading - models are loaded only when needed
         self.model = None
         self.tfidf_vectorizer = None
-        self._initialize_model()
 
     def _initialize_model(self):
-        """Initialize the appropriate model based on available libraries"""
+        """Lazy initialization of the appropriate model based on available libraries"""
         if SENTENCE_TRANSFORMERS_AVAILABLE:
-            try:
-                print(f"Loading Sentence-BERT model: {self.model_name}")
-                self.model = SentenceTransformer(
-                    self.model_name, cache_folder=self.cache_dir
-                )
-                print("✅ Sentence-BERT model loaded successfully")
-            except Exception as e:
-                print(f"❌ Failed to load Sentence-BERT model: {e}")
-                print("Falling back to TF-IDF vectorization")
-                self._initialize_tfidf()
+            cache_key = f"sentence_transformer_{self.model_name}"
+            if cache_key not in _MODEL_CACHE:
+                try:
+                    print(f"Loading Sentence-BERT model: {self.model_name}")
+                    _MODEL_CACHE[cache_key] = SentenceTransformer(
+                        self.model_name, cache_folder=self.cache_dir
+                    )
+                    print("✅ Sentence-BERT model loaded and cached successfully")
+                except Exception as e:
+                    print(f"❌ Failed to load Sentence-BERT model: {e}")
+                    print("Falling back to TF-IDF vectorization")
+                    self._initialize_tfidf()
+                    return
+            self.model = _MODEL_CACHE[cache_key]
+            print(f"✅ Using cached Sentence-BERT model: {self.model_name}")
         else:
             print("⚠️ sentence-transformers not available, using TF-IDF fallback")
             self._initialize_tfidf()
@@ -68,32 +77,50 @@ class SemanticMatcher:
     def _initialize_tfidf(self):
         """Initialize TF-IDF vectorizer as fallback"""
         if SKLEARN_AVAILABLE:
-            self.tfidf_vectorizer = TfidfVectorizer(
-                max_features=5000,
-                stop_words="english",
-                ngram_range=(1, 3),
-                lowercase=True,
-                strip_accents="unicode",
-            )
-            print("✅ TF-IDF vectorizer initialized")
+            cache_key = "tfidf_vectorizer"
+            if cache_key not in _TFIDF_CACHE:
+                _TFIDF_CACHE[cache_key] = TfidfVectorizer(
+                    max_features=5000,
+                    stop_words="english",
+                    ngram_range=(1, 3),
+                    lowercase=True,
+                    strip_accents="unicode",
+                )
+                print("✅ TF-IDF vectorizer initialized and cached")
+            self.tfidf_vectorizer = _TFIDF_CACHE[cache_key]
         else:
             print("❌ Neither sentence-transformers nor scikit-learn available")
             print("Semantic matching will use basic text overlap")
 
-    def encode_text(self, text: str) -> np.ndarray:
+    def encode_text(self, text: str, use_cache: bool = True) -> np.ndarray:
         """
         Encode text into vector representation
 
         Args:
             text: Input text to encode
+            use_cache: Whether to check for cached embeddings
 
         Returns:
             np.ndarray: Vector representation of the text
         """
+        # Check cache first if enabled
+        if use_cache:
+            cache_key = f"text_{hash(text)}"
+            cached = self.load_cached_embeddings(cache_key)
+            if cached is not None and len(cached) > 0:
+                return cached[0]
+
+        # Lazy load model if not initialized
+        if self.model is None and self.tfidf_vectorizer is None:
+            self._initialize_model()
+
         if self.model is not None:
             # Use Sentence-BERT
             try:
                 embedding = self.model.encode(text, convert_to_numpy=True)
+                # Cache the result
+                if use_cache:
+                    self.cache_embeddings([text], cache_key)
                 return embedding
             except Exception as e:
                 print(f"Error encoding with Sentence-BERT: {e}")
@@ -107,19 +134,36 @@ class SemanticMatcher:
             # Basic fallback - return word count vector
             return self._basic_encode(text)
 
-    def encode_texts(self, texts: List[str]) -> np.ndarray:
+    def encode_texts(self, texts: List[str], use_cache: bool = True) -> np.ndarray:
         """
         Encode multiple texts into vector representations
 
         Args:
             texts: List of texts to encode
+            use_cache: Whether to check for cached embeddings
 
         Returns:
             np.ndarray: Matrix of vector representations
         """
+        # Check cache first if enabled
+        if use_cache and len(texts) == 1:
+            cache_key = f"text_{hash(texts[0])}"
+            cached = self.load_cached_embeddings(cache_key)
+            if cached is not None:
+                return cached
+
+        # Lazy load model if not initialized
+        if self.model is None and self.tfidf_vectorizer is None:
+            self._initialize_model()
+
         if self.model is not None:
             try:
                 embeddings = self.model.encode(texts, convert_to_numpy=True)
+                # Cache individual texts if requested
+                if use_cache:
+                    for i, text in enumerate(texts):
+                        cache_key = f"text_{hash(text)}"
+                        self.cache_embeddings([text], cache_key)
                 return embeddings
             except Exception as e:
                 print(f"Error encoding with Sentence-BERT: {e}")
@@ -129,6 +173,7 @@ class SemanticMatcher:
             return self._encode_with_tfidf(texts)
 
         else:
+            # Basic fallback
             return np.array([self._basic_encode(text) for text in texts])
 
     def _encode_with_tfidf(self, texts: List[str]) -> np.ndarray:

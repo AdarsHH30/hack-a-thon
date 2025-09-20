@@ -16,12 +16,23 @@ class GroqDataCleaner:
     """
 
     def __init__(self):
-        self.api_key = "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"
+        self.api_key = os.getenv(
+            "GROQ_API_KEY", "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"
+        )
         self.base_url = "https://api.groq.com/openai/v1/chat/completions"
         self.model = "llama-3.1-8b-instant"
 
-        if not self.api_key:
-            raise ValueError("GROQ_API_KEY environment variable is required")
+        if (
+            not self.api_key
+            or self.api_key
+            == "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"
+        ):
+            print(
+                "⚠️ GROQ_API_KEY not set or using placeholder. Data cleaning will be skipped."
+            )
+            self.api_available = False
+        else:
+            self.api_available = True
 
     def clean_resume_data(self, raw_text: str) -> Dict[str, Any]:
         """
@@ -33,6 +44,13 @@ class GroqDataCleaner:
         Returns:
             Dict[str, Any]: Structured resume data in JSON format
         """
+        if not self.api_available:
+            return {
+                "success": False,
+                "error": "Groq API not available, using raw text",
+                "raw_text": raw_text,
+            }
+
         try:
             prompt = self._create_resume_prompt(raw_text)
             response = self._call_groq_api(prompt)
@@ -68,6 +86,13 @@ class GroqDataCleaner:
         Returns:
             Dict[str, Any]: Structured job description data in JSON format
         """
+        if not self.api_available:
+            return {
+                "success": False,
+                "error": "Groq API not available, using raw text",
+                "raw_text": raw_text,
+            }
+
         try:
             prompt = self._create_job_description_prompt(raw_text)
             response = self._call_groq_api(prompt)
