@@ -1,18 +1,20 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.routes.test_routes import router as test_router
+from app.api.routes.job_routes import router as job_router
+from app.api.routes.pdf_routes import router as pdf_router
 
 app = FastAPI(title="Innomatics API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with specific origins
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-app.include_router(test_router, prefix="/api/test", tags=["test"])
+app.include_router(job_router, prefix="/api/jobs", tags=["jobs"])
+app.include_router(pdf_router, prefix="/api/pdf", tags=["pdf"])
 
 
 @app.get("/")
