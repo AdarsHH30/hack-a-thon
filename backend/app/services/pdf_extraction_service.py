@@ -7,12 +7,13 @@ import json
 import sys
 from pathlib import Path
 from typing import Dict, Any, Optional
+from datetime import datetime
 
 # Add the parent directories to the path to import modules
 sys.path.append(str(Path(__file__).parent.parent))
 sys.path.append(str(Path(__file__).parent))
 
-from parsing.simple_extractor import extract_pdf_text
+from parsing.pdf_extractor import FixedPDFParser
 
 
 class PDFExtractionService:
@@ -44,11 +45,12 @@ class PDFExtractionService:
 
             print(f"🔍 Starting PDF text extraction for: {Path(pdf_path).name}")
 
-            # Extract raw text from PDF
+            # Extract raw text from PDF using advanced parser
             print("📄 Extracting text from PDF...")
-            extraction_result = extract_pdf_text(pdf_path)
+            parser = FixedPDFParser()
+            extraction_result = parser.parse_pdf(pdf_path)
 
-            if not extraction_result.get("success", False):
+            if "error" in extraction_result:
                 return {
                     "success": False,
                     "error": f"PDF extraction failed: {extraction_result.get('error', 'Unknown error')}",
@@ -67,16 +69,25 @@ class PDFExtractionService:
 
             print(f"✅ Text extracted successfully. Length: {len(raw_text)} characters")
 
-            # Return extraction result
+            # Return extraction result with structured data
             final_result = {
                 "success": True,
                 "document_info": {
                     "source_file": extraction_result.get("source_file"),
-                    "extracted_at": extraction_result.get("extracted_at"),
-                    "text_length": extraction_result.get("text_length"),
+                    "extracted_at": extraction_result.get(
+                        "parsed_at", datetime.now().isoformat()
+                    ),
+                    "text_length": len(raw_text),
+                    "document_type": extraction_result.get("document_type"),
                 },
                 "raw_text": raw_text,
-                "processing_stages": {"extraction": "success"},
+                "structured_data": {
+                    k: v
+                    for k, v in extraction_result.items()
+                    if k
+                    not in ["raw_text", "source_file", "parsed_at", "document_type"]
+                },
+                "processing_stages": {"extraction": "success", "parsing": "success"},
             }
 
             print("🎉 PDF text extraction completed successfully!")

@@ -16,22 +16,21 @@ class GroqDataCleaner:
     """
 
     def __init__(self):
-        self.api_key = os.getenv(
-            "GROQ_API_KEY", "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"
-        )
+        self.api_key = os.getenv("GROQ_API_KEY")
         self.base_url = "https://api.groq.com/openai/v1/chat/completions"
         self.model = "llama-3.1-8b-instant"
 
-        if (
-            not self.api_key
-            or self.api_key
-            == "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"
-        ):
+        if not self.api_key:
             print(
-                "⚠️ GROQ_API_KEY not set or using placeholder. Data cleaning will be skipped."
+                "⚠️ GROQ_API_KEY environment variable not set. Data cleaning will be skipped."
             )
+            print(
+                "   To enable Groq API functionality, set GROQ_API_KEY in your environment variables."
+            )
+            print("   Get your API key from: https://console.groq.com/")
             self.api_available = False
         else:
+            print("✅ Groq API key found. Data cleaning is available.")
             self.api_available = True
 
     def clean_resume_data(self, raw_text: str) -> Dict[str, Any]:
@@ -86,13 +85,6 @@ class GroqDataCleaner:
         Returns:
             Dict[str, Any]: Structured job description data in JSON format
         """
-        if not self.api_available:
-            return {
-                "success": False,
-                "error": "Groq API not available, using raw text",
-                "raw_text": raw_text,
-            }
-
         try:
             prompt = self._create_job_description_prompt(raw_text)
             response = self._call_groq_api(prompt)
@@ -247,20 +239,34 @@ Return only the JSON object, no additional text or explanations.
                 try:
                     # Clean the response to extract JSON
                     content = content.strip()
+
+                    # Remove markdown code blocks
                     if content.startswith("```json"):
                         content = content[7:]
+                    if content.startswith("```"):
+                        content = content[3:]
                     if content.endswith("```"):
                         content = content[:-3]
                     content = content.strip()
 
-                    structured_data = json.loads(content)
+                    # Try to find JSON object in the content
+                    import re
 
-                    return {"success": True, "data": structured_data}
+                    json_match = re.search(r"\{.*\}", content, re.DOTALL)
+                    if json_match:
+                        json_content = json_match.group()
+                        structured_data = json.loads(json_content)
+                        return {"success": True, "data": structured_data}
+                    else:
+                        # If no JSON found, try parsing the whole content
+                        structured_data = json.loads(content)
+                        return {"success": True, "data": structured_data}
+
                 except json.JSONDecodeError as e:
                     return {
                         "success": False,
                         "error": f"Failed to parse JSON response: {str(e)}",
-                        "raw_response": content,
+                        "raw_response": content[:500],  # Limit raw response length
                     }
             else:
                 return {"success": False, "error": "No valid response from Groq API"}

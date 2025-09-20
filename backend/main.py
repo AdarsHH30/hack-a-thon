@@ -1,5 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv()
+
 from app.api.routes.main_routes import router as main_router
 
 app = FastAPI(
@@ -33,6 +39,8 @@ async def root():
             "upload_job_description": "POST /api/job-description",
             "upload_resume": "POST /api/resume",
             "manual_match": "POST /api/match",
+            "get_all_jobs": "GET /api/get-jobs",
+            "get_job_by_id": "GET /api/get-job/{job_id}",
             "status": "GET /api/status",
             "reset": "DELETE /api/reset",
         },

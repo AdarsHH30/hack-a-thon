@@ -39,7 +39,7 @@ except ImportError as e:
 router = APIRouter()
 
 # Simple in-memory storage (replace with database in production)
-job_storage = {"current_jd": None}
+job_storage = []  # Changed to list to store multiple job descriptions
 resume_storage = {"current_resume": None}
 
 
@@ -137,15 +137,21 @@ async def upload_job_description(
                 status_code=400, detail="No text content found in job description"
             )
 
-        # Store job description
-        job_storage["current_jd"] = {
+        # Store job description with unique ID
+        job_id = len(job_storage) + 1
+        job_data = {
+            "id": job_id,
             "text": final_jd_text,
             "source_type": source_type,
             "uploaded_at": datetime.now().isoformat(),
+            "filename": jd_file.filename if jd_file else None,
+            "document_type": extraction_result.get("document_type"),
+            "structured_data": extraction_result.get("structured_data", {}),
         }
+        job_storage.append(job_data)
 
         print(
-            f"✅ Job description uploaded ({source_type}). Length: {len(final_jd_text)} characters"
+            f"✅ Job description uploaded ({source_type}). ID: {job_id}, Length: {len(final_jd_text)} characters"
         )
 
         # Check if resume is already uploaded
@@ -234,6 +240,8 @@ async def upload_resume(
                 "text": resume_text,
                 "filename": resume_file.filename,
                 "uploaded_at": datetime.now().isoformat(),
+                "document_type": extraction_result.get("document_type"),
+                "structured_data": extraction_result.get("structured_data", {}),
             }
 
             print(f"✅ Resume uploaded. Length: {len(resume_text)} characters")
@@ -274,9 +282,9 @@ async def trigger_manual_matching():
         Matching results with score, suggestions, and improvements
     """
     try:
-        if job_storage["current_jd"] is None:
+        if not job_storage:
             raise HTTPException(
-                status_code=400, detail="Job description not uploaded yet"
+                status_code=400, detail="No job descriptions uploaded yet"
             )
 
         if resume_storage["current_resume"] is None:
@@ -300,9 +308,12 @@ async def _trigger_matching_process():
     try:
         print("🤖 Starting complete matching process...")
 
-        # Get stored data
-        jd_data = job_storage["current_jd"]
+        # Get stored data - use the most recent job description
+        jd_data = job_storage[-1] if job_storage else None
         resume_data = resume_storage["current_resume"]
+
+        if not jd_data:
+            raise HTTPException(status_code=400, detail="No job descriptions available")
 
         jd_text = jd_data["text"]
         resume_text = resume_data["text"]
@@ -455,14 +466,134 @@ async def get_status():
     """
     return {
         "success": True,
-        "job_description_uploaded": job_storage["current_jd"] is not None,
+        "job_descriptions_count": len(job_storage),
+        "job_descriptions_uploaded": len(job_storage) > 0,
         "resume_uploaded": resume_storage["current_resume"] is not None,
         "ready_for_matching": (
-            job_storage["current_jd"] is not None
-            and resume_storage["current_resume"] is not None
+            len(job_storage) > 0 and resume_storage["current_resume"] is not None
         ),
         "timestamp": datetime.now().isoformat(),
     }
+
+
+@router.get("/get-jobs")
+async def get_jobs():
+    """
+    Get all uploaded job descriptions with detailed information
+
+    Returns:
+        List of all job descriptions with their details
+    """
+    try:
+        if not job_storage:
+            return {
+                "success": True,
+                "message": "No job descriptions uploaded yet",
+                "jobs": [],
+                "total_count": 0,
+                "timestamp": datetime.now().isoformat(),
+            }
+
+        # Format job descriptions for response with Groq-structured data
+        jobs_list = []
+        for job in job_storage:
+            # Use Groq API to parse job description into structured JSON
+            groq_result = clean_job_description_text(job["text"])
+
+            job_info = {
+                "id": job["id"],
+                "filename": job.get("filename"),
+                "source_type": job["source_type"],
+                "uploaded_at": job["uploaded_at"],
+                "text_length": len(job["text"]),
+                "full_text": job["text"],
+                "document_type": job.get("document_type"),
+                "groq_structured_data": (
+                    groq_result.get("structured_data", {})
+                    if groq_result.get("success")
+                    else {}
+                ),
+                "groq_parsing_success": groq_result.get("success", False),
+                "groq_error": (
+                    groq_result.get("error") if not groq_result.get("success") else None
+                ),
+                "structured_data": job.get(
+                    "structured_data", {}
+                ),  # Keep existing PDF parser data
+            }
+            jobs_list.append(job_info)
+
+        return {
+            "success": True,
+            "message": f"Found {len(job_storage)} job description(s)",
+            "jobs": jobs_list,
+            "total_count": len(job_storage),
+            "timestamp": datetime.now().isoformat(),
+        }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error retrieving job descriptions: {str(e)}"
+        )
+
+
+@router.get("/get-job/{job_id}")
+async def get_job_by_id(job_id: int):
+    """
+    Get a specific job description by ID
+
+    Args:
+        job_id: The ID of the job description to retrieve
+
+    Returns:
+        Detailed job description information
+    """
+    try:
+        # Find job by ID
+        job = None
+        for j in job_storage:
+            if j["id"] == job_id:
+                job = j
+                break
+
+        if not job:
+            raise HTTPException(
+                status_code=404, detail=f"Job description with ID {job_id} not found"
+            )
+
+        # Use Groq API to parse job description into structured JSON
+        groq_result = clean_job_description_text(job["text"])
+
+        return {
+            "success": True,
+            "job": {
+                "id": job["id"],
+                "filename": job.get("filename"),
+                "source_type": job["source_type"],
+                "uploaded_at": job["uploaded_at"],
+                "text_length": len(job["text"]),
+                "full_text": job["text"],
+                "document_type": job.get("document_type"),
+                "groq_structured_data": (
+                    groq_result.get("structured_data", {})
+                    if groq_result.get("success")
+                    else {}
+                ),
+                "groq_parsing_success": groq_result.get("success", False),
+                "groq_error": (
+                    groq_result.get("error") if not groq_result.get("success") else None
+                ),
+                "structured_data": job.get("structured_data", {}),
+            },
+            "timestamp": datetime.now().isoformat(),
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error retrieving job description: {str(e)}"
+        )
 
 
 @router.delete("/reset")
@@ -473,7 +604,7 @@ async def reset_uploads():
     Returns:
         Success message
     """
-    job_storage["current_jd"] = None
+    job_storage.clear()
     resume_storage["current_resume"] = None
 
     return {
