@@ -1,30 +1,52 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.routes.job_routes import router as job_router
-from app.api.routes.pdf_routes import router as pdf_router
+from app.api.routes.main_routes import router as main_router
 
-app = FastAPI(title="Innomatics API", version="1.0.0")
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+app = FastAPI(
+    title="Innomatics Resume-Job Matching API",
+    version="2.0.0",
+    description="Professional API for resume-job matching with AI-powered analysis",
 )
 
-app.include_router(job_router, prefix="/api/jobs", tags=["jobs"])
-app.include_router(pdf_router, prefix="/api/pdf", tags=["pdf"])
+# More secure CORS configuration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:3001",
+    ],  # Specific frontend URLs
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "DELETE"],  # Only needed methods
+    allow_headers=["Content-Type", "Authorization"],
+)
+
+# Main router for all functionality
+app.include_router(main_router, prefix="/api", tags=["resume-job-matching"])
 
 
 @app.get("/")
 async def root():
-    return {"message": "Welcome to Innomatics API"}
+    return {
+        "message": "Welcome to Innomatics Resume-Job Matching API",
+        "version": "2.0.0",
+        "endpoints": {
+            "upload_job_description": "POST /api/job-description",
+            "upload_resume": "POST /api/resume",
+            "manual_match": "POST /api/match",
+            "status": "GET /api/status",
+            "reset": "DELETE /api/reset",
+        },
+        "flow": "Upload JD → Upload Resume → Auto-match with AI cleaning and analysis",
+    }
 
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy", "message": "API is running"}
+    return {
+        "status": "healthy",
+        "message": "Simplified Resume-Job Matching API is running",
+        "version": "2.0.0",
+    }
 
 
 if __name__ == "__main__":

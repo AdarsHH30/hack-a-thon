@@ -1,0 +1,68 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+
+# Virtual environments
+venv/
+ENV/
+.env/
+.envrc
+
+# gs
+*.log
+server.log
+
+# Test and temp files
+*.tmp
+*.bak
+*.swp
+*.swo
+*.test
+*.coverage
+*.pytest_cache/
+
+# Jupyter and notebook
+.ipynb_checkpoints/
+*.ipynb
+
+# IDE and editor
+.vscode/
+.idea/
+*.code-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Model cache and large files
+app/services/matching/cache/
+
+# Assets and results
+app/assets/extraction_results/
+
+# Old backups
+app/api/routes/backup/
+
+# Misc
+*.old
+*.orig
+*.rej
+
+# Node modules (if any frontend in backend)
+node_modules/
+
+# Ignore sample documents
+app/assets/sample_documents/
+
+# Ignore extraction results
+app/assets/extraction_results/
