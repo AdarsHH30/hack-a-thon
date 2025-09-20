@@ -13,16 +13,15 @@ interface AnimatedButtonProps {
   href?: string;
 }
 
-export default function AnimatedButton({ 
-  children, 
-  onClick, 
-  variant = "primary", 
-  size = "md", 
-  className = "", 
+export default function AnimatedButton({
+  children,
+  onClick,
+  variant = "primary",
+  size = "md",
+  className = "",
   disabled = false,
-  href 
+  href,
 }: AnimatedButtonProps) {
-  
   const baseClasses = `
     relative inline-flex items-center justify-center font-semibold 
     rounded-lg transition-all duration-300 overflow-hidden group
@@ -34,7 +33,7 @@ export default function AnimatedButton({
   const sizeClasses = {
     sm: "px-4 py-2 text-sm",
     md: "px-6 py-3 text-base",
-    lg: "px-8 py-4 text-lg"
+    lg: "px-8 py-4 text-lg",
   };
 
   const variantClasses = {
@@ -51,7 +50,7 @@ export default function AnimatedButton({
     outline: `
       border-2 border-blue-600 text-blue-600 bg-transparent
       hover:bg-blue-50 focus:ring-blue-500
-    `
+    `,
   };
 
   const buttonClasses = `${baseClasses} ${sizeClasses[size]} ${variantClasses[variant]}`;
@@ -60,19 +59,17 @@ export default function AnimatedButton({
     <>
       {/* Animated gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 opacity-0 group-hover:opacity-20 transition-opacity duration-500 ease-out" />
-      
+
       {/* Glow effect */}
       <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 blur-lg opacity-0 group-hover:opacity-30 transition-opacity duration-500 scale-110" />
-      
+
       {/* Shimmer effect */}
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
       </div>
-      
+
       {/* Button content */}
-      <span className="relative z-10 flex items-center gap-2">
-        {children}
-      </span>
+      <span className="relative z-10 flex items-center gap-2">{children}</span>
     </>
   );
 
@@ -105,7 +102,10 @@ export default function AnimatedButton({
 }
 
 // Preset button variants for common use cases
-export function PrimaryButton({ children, ...props }: Omit<AnimatedButtonProps, 'variant'>) {
+export function PrimaryButton({
+  children,
+  ...props
+}: Omit<AnimatedButtonProps, "variant">) {
   return (
     <AnimatedButton variant="primary" {...props}>
       {children}
@@ -113,7 +113,10 @@ export function PrimaryButton({ children, ...props }: Omit<AnimatedButtonProps, 
   );
 }
 
-export function SecondaryButton({ children, ...props }: Omit<AnimatedButtonProps, 'variant'>) {
+export function SecondaryButton({
+  children,
+  ...props
+}: Omit<AnimatedButtonProps, "variant">) {
   return (
     <AnimatedButton variant="secondary" {...props}>
       {children}
@@ -121,7 +124,10 @@ export function SecondaryButton({ children, ...props }: Omit<AnimatedButtonProps
   );
 }
 
-export function OutlineButton({ children, ...props }: Omit<AnimatedButtonProps, 'variant'>) {
+export function OutlineButton({
+  children,
+  ...props
+}: Omit<AnimatedButtonProps, "variant">) {
   return (
     <AnimatedButton variant="outline" {...props}>
       {children}
@@ -130,10 +136,10 @@ export function OutlineButton({ children, ...props }: Omit<AnimatedButtonProps, 
 }
 
 // Special gradient buttons with unique effects
-export function GradientButton({ 
-  children, 
+export function GradientButton({
+  children,
   gradient = "from-blue-500 to-purple-600",
-  ...props 
+  ...props
 }: AnimatedButtonProps & { gradient?: string }) {
   return (
     <motion.button
@@ -147,40 +153,41 @@ export function GradientButton({
         bg-gradient-to-r ${gradient}
         ${props.className || ""}
       `}
-      whileHover={{ scale: 1.02, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)" }}
+      whileHover={{
+        scale: 1.02,
+        boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
+      }}
       whileTap={{ scale: 0.98 }}
       transition={{ duration: 0.2 }}
     >
       {/* Animated overlay gradient */}
-      <motion.div 
+      <motion.div
         className="absolute inset-0 bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500"
         initial={{ opacity: 0 }}
         whileHover={{ opacity: 0.3 }}
         transition={{ duration: 0.5 }}
       />
-      
+
       {/* Glow effect */}
-      <motion.div 
+      <motion.div
         className={`absolute inset-0 bg-gradient-to-r ${gradient} blur-xl`}
         initial={{ opacity: 0, scale: 0.8 }}
         whileHover={{ opacity: 0.4, scale: 1.1 }}
         transition={{ duration: 0.5 }}
       />
-      
+
       {/* Shimmer animation */}
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
-        <motion.div 
+        <motion.div
           className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent w-full h-full"
           initial={{ x: "-100%" }}
           whileHover={{ x: "100%" }}
           transition={{ duration: 1, ease: "easeInOut" }}
         />
       </div>
-      
+
       {/* Content */}
-      <span className="relative z-10">
-        {children}
-      </span>
+      <span className="relative z-10">{children}</span>
     </motion.button>
   );
 }

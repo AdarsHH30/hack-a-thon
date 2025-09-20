@@ -8,15 +8,18 @@ interface SimpleCard3DProps {
   className?: string;
 }
 
-export default function SimpleCard3D({ children, className = "" }: SimpleCard3DProps) {
+export default function SimpleCard3D({
+  children,
+  className = "",
+}: SimpleCard3DProps) {
   return (
     <div style={{ perspective: "1000px" }}>
       <motion.div
         className={`bg-white rounded-lg shadow-lg p-6 cursor-pointer ${className}`}
-        initial={{ 
-          rotateX: 0, 
-          rotateY: 0, 
-          scale: 1 
+        initial={{
+          rotateX: 0,
+          rotateY: 0,
+          scale: 1,
         }}
         whileHover={{
           rotateX: -10,
@@ -24,18 +27,18 @@ export default function SimpleCard3D({ children, className = "" }: SimpleCard3DP
           scale: 1.05,
           transition: {
             duration: 0.3,
-            ease: "easeOut"
-          }
+            ease: "easeOut",
+          },
         }}
         whileTap={{
           scale: 0.95,
           transition: {
-            duration: 0.1
-          }
+            duration: 0.1,
+          },
         }}
         style={{
           transformStyle: "preserve-3d",
-          transformOrigin: "center center"
+          transformOrigin: "center center",
         }}
       >
         {children}

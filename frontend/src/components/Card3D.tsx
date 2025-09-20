@@ -16,10 +16,10 @@ export default function Card3D({ children, className = "" }: Card3DProps) {
           bg-white rounded-xl shadow-lg p-6 cursor-pointer
           ${className}
         `}
-        initial={{ 
-          rotateX: 0, 
-          rotateY: 0, 
-          scale: 1 
+        initial={{
+          rotateX: 0,
+          rotateY: 0,
+          scale: 1,
         }}
         whileHover={{
           rotateX: -8,
@@ -27,14 +27,14 @@ export default function Card3D({ children, className = "" }: Card3DProps) {
           scale: 1.05,
           transition: {
             duration: 0.3,
-            ease: "easeOut"
-          }
+            ease: "easeOut",
+          },
         }}
         whileTap={{
           scale: 0.98,
           transition: {
-            duration: 0.1
-          }
+            duration: 0.1,
+          },
         }}
         style={{
           transformStyle: "preserve-3d",
@@ -69,13 +69,13 @@ export function ExampleCard3D() {
 }
 
 // Advanced 3D card with custom tilt angles
-export function AdvancedCard3D({ 
-  children, 
+export function AdvancedCard3D({
+  children,
   className = "",
   tiltX = -10,
   tiltY = 10,
   scale = 1.08,
-  duration = 0.4
+  duration = 0.4,
 }: Card3DProps & {
   tiltX?: number;
   tiltY?: number;
@@ -90,9 +90,9 @@ export function AdvancedCard3D({
           border border-gray-100 relative overflow-hidden
           ${className}
         `}
-        initial={{ 
-          rotateX: 0, 
-          rotateY: 0, 
+        initial={{
+          rotateX: 0,
+          rotateY: 0,
           scale: 1,
         }}
         whileHover={{
@@ -101,39 +101,38 @@ export function AdvancedCard3D({
           scale: scale,
           transition: {
             duration: duration,
-            ease: [0.25, 0.46, 0.45, 0.94]
-          }
+            ease: [0.25, 0.46, 0.45, 0.94],
+          },
         }}
         whileTap={{
           scale: 0.95,
           transition: {
-            duration: 0.1
-          }
+            duration: 0.1,
+          },
         }}
         style={{
           transformStyle: "preserve-3d",
-          boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)"
+          boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)",
         }}
       >
         {/* Shine effect on hover */}
         <motion.div
           className="absolute inset-0 opacity-0 pointer-events-none z-10"
           style={{
-            background: "linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.3) 50%, transparent 60%)"
+            background:
+              "linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.3) 50%, transparent 60%)",
           }}
           whileHover={{
             opacity: 1,
             x: ["-100%", "100%"],
             transition: {
               duration: 0.6,
-              ease: "easeInOut"
-            }
+              ease: "easeInOut",
+            },
           }}
         />
-        
-        <div className="relative z-20">
-          {children}
-        </div>
+
+        <div className="relative z-20">{children}</div>
       </motion.div>
     </div>
   );
