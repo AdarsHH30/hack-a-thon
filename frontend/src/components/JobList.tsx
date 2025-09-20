@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useAuth } from "./AuthProvider";
 import { supabase } from "@/lib/supabaseClient";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface JobDescription {
   id: string;
@@ -31,6 +32,9 @@ export default function JobList() {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const { user } = useAuth();
+  
+  // Check if user is admin (you can implement proper role checking later)
+  const isAdmin = user?.user_metadata?.role === 'admin' || user?.email?.includes('admin');
 
   // Load job descriptions on component mount
   useEffect(() => {
@@ -158,7 +162,7 @@ export default function JobList() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <motion.div
@@ -167,135 +171,168 @@ export default function JobList() {
           className="text-center mb-8"
         >
           <div className="flex justify-between items-center mb-4">
-            <div></div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">
-                Welcome, {user?.user_metadata?.name || user?.email}
-              </span>
-              <Button
-                onClick={handleLogout}
-                variant="outline"
-                size="sm"
-                className="text-gray-600 hover:text-gray-800"
-              >
-                Logout
-              </Button>
-            </div>
-          </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            💼 Job Descriptions Management
-          </h1>
-          <p className="text-lg text-gray-600">
-            Manage and upload job descriptions for placement opportunities
-          </p>
-          <div className="mt-4">
             <Link
               href="/"
               className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 transition-colors"
             >
               ← Back to home
             </Link>
+            <div className="flex items-center space-x-4">
+              {user ? (
+                <>
+                  <span className="text-sm text-gray-600">
+                    Welcome, {user?.user_metadata?.name || user?.email}
+                  </span>
+                  <Button
+                    onClick={handleLogout}
+                    variant="outline"
+                    size="sm"
+                    className="text-gray-600 hover:text-gray-800"
+                  >
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <div className="flex space-x-2">
+                  <Link href="/student-login">
+                    <Button variant="outline" size="sm">
+                      Student Login
+                    </Button>
+                  </Link>
+                  <Link href="/admin-login">
+                    <Button variant="outline" size="sm">
+                      Admin Login
+                    </Button>
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            💼 Available Job Opportunities
+          </h1>
+          <p className="text-lg text-gray-600">
+            Discover amazing career opportunities from top companies
+          </p>
         </motion.div>
 
-        {/* Job Listings */}
+        {/* Admin Upload Button */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="flex justify-end mb-6"
+        >
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => {
+              if (isAdmin) {
+                setShowUploadModal(true);
+              } else {
+                // Redirect to admin login if not authenticated as admin
+                window.location.href = '/admin-login';
+              }
+            }}
+            className="px-6 py-3 bg-gradient-to-r from-green-600 to-teal-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+          >
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-xl">📤</span>
+              <span>Upload Job</span>
+            </div>
+          </motion.button>
+        </motion.div>
+
+        {/* Job Listings Grid */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 mb-8"
+          className="mb-8"
         >
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-semibold text-gray-900">
-              Current Job Descriptions
-            </h2>
-            <span className="text-sm text-gray-500">
-              {jobDescriptions.length} job{jobDescriptions.length !== 1 ? 's' : ''} posted
-            </span>
-          </div>
-
           {isLoadingJobs ? (
-            <div className="space-y-6">
-              {[...Array(3)].map((_, index) => (
-                <div key={index} className="animate-pulse">
-                  <div className="bg-gray-200 h-6 w-3/4 rounded mb-2"></div>
-                  <div className="bg-gray-200 h-4 w-1/2 rounded mb-2"></div>
-                  <div className="bg-gray-200 h-20 w-full rounded"></div>
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, index) => (
+                <Card key={index} className="animate-pulse">
+                  <CardHeader>
+                    <div className="bg-gray-200 h-6 w-3/4 rounded mb-2"></div>
+                    <div className="bg-gray-200 h-4 w-1/2 rounded"></div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="bg-gray-200 h-20 w-full rounded mb-4"></div>
+                    <div className="flex space-x-2">
+                      <div className="bg-gray-200 h-6 w-16 rounded"></div>
+                      <div className="bg-gray-200 h-6 w-20 rounded"></div>
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           ) : (
-            <div className="grid gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {jobDescriptions.map((job, index) => (
                 <motion.div
                   key={job.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all duration-300"
                 >
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex-1">
-                      <h3 className="text-xl font-semibold text-gray-900 mb-1">
+                  <Card className="h-full hover:shadow-lg transition-all duration-300 hover:border-blue-300">
+                    <CardHeader>
+                      <CardTitle className="text-xl font-bold text-gray-900 line-clamp-2">
                         {job.title}
-                      </h3>
-                      <p className="text-blue-600 font-medium text-lg">{job.company}</p>
-                      <div className="flex items-center space-x-4 mt-2 text-sm text-gray-600">
+                      </CardTitle>
+                      <CardDescription className="text-lg font-semibold text-blue-600">
+                        {job.company}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center space-x-4 mb-4 text-sm text-gray-600">
                         <span>📍 {job.location}</span>
                         <span>💼 {job.type}</span>
-                        <span>📅 {job.postedDate}</span>
                         {job.salary && <span>💰 {job.salary}</span>}
                       </div>
-                    </div>
-                    <div className="flex space-x-2 ml-4">
-                      <button className="px-4 py-2 bg-blue-100 text-blue-700 font-medium rounded-lg hover:bg-blue-200 transition-colors">
-                        Edit
-                      </button>
-                      <button className="px-4 py-2 bg-red-100 text-red-700 font-medium rounded-lg hover:bg-red-200 transition-colors">
-                        Delete
-                      </button>
-                    </div>
-                  </div>
+                      
+                      <p className="text-gray-700 mb-4 leading-relaxed line-clamp-3">
+                        {job.description}
+                      </p>
 
-                  <p className="text-gray-700 mb-4 leading-relaxed">
-                    {job.description}
-                  </p>
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {job.requirements.slice(0, 3).map((req, reqIndex) => (
+                          <span
+                            key={reqIndex}
+                            className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full"
+                          >
+                            {req}
+                          </span>
+                        ))}
+                        {job.requirements.length > 3 && (
+                          <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">
+                            +{job.requirements.length - 3} more
+                          </span>
+                        )}
+                      </div>
 
-                  <div className="flex flex-wrap gap-2">
-                    {job.requirements.map((req, reqIndex) => (
-                      <span
-                        key={reqIndex}
-                        className="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full"
-                      >
-                        {req}
-                      </span>
-                    ))}
-                  </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-500">📅 {job.postedDate}</span>
+                        <Link href={`/job-description?id=${job.id}`}>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                          >
+                            View Details
+                          </motion.button>
+                        </Link>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </motion.div>
               ))}
             </div>
           )}
         </motion.div>
 
-        {/* Upload Job Button */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="text-center"
-        >
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setShowUploadModal(true)}
-            className="px-8 py-4 bg-gradient-to-r from-green-600 to-teal-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
-          >
-            <div className="flex items-center justify-center gap-3">
-              <span className="text-2xl">📤</span>
-              <span className="text-lg">Upload New Job</span>
-            </div>
-          </motion.button>
-        </motion.div>
 
         {/* Upload Modal */}
         <AnimatePresence>

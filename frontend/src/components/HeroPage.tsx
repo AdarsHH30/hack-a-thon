@@ -105,46 +105,38 @@ const HeroPage = memo(function HeroPage() {
               Welcome to
               <br />
               <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                Student Portal
+                Career Portal
               </span>
             </h1>
 
             <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-              Upload your resume and get AI-powered feedback to enhance your career prospects
+              Discover amazing job opportunities and connect with top employers. 
+              Upload your resume to get started with AI-powered career matching.
             </p>
           </motion.div>
 
-          {/* Buttons */}
+          {/* Get Started Button */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="flex flex-col sm:flex-row justify-center items-center gap-6"
+            className="flex justify-center"
           >
-            {/* Student Login Button */}
-            <Link href="/student-login">
-              <motion.button
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                className="px-12 py-5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 ease-out hover:from-blue-700 hover:to-purple-700 border-2 border-transparent hover:border-white/20"
-              >
-                <div className="flex items-center justify-center gap-4">
-                  <span className="text-3xl">🎓</span>
-                  <span className="text-xl">Login as Student</span>
-                </div>
-              </motion.button>
-            </Link>
-
-            {/* Job List Button */}
             <Link href="/job-list">
               <motion.button
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
-                className="px-12 py-5 bg-gradient-to-r from-green-600 to-teal-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 ease-out hover:from-green-700 hover:to-teal-700 border-2 border-transparent hover:border-white/20"
+                className="px-16 py-6 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white font-bold text-xl rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 ease-out hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 border-2 border-transparent hover:border-white/20"
               >
                 <div className="flex items-center justify-center gap-4">
-                  <span className="text-3xl">💼</span>
-                  <span className="text-xl">Job List</span>
+                  <span className="text-3xl">🚀</span>
+                  <span>Get Started</span>
+                  <motion.span
+                    animate={{ x: [0, 5, 0] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  >
+                    →
+                  </motion.span>
                 </div>
               </motion.button>
             </Link>
@@ -157,9 +149,23 @@ const HeroPage = memo(function HeroPage() {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="mt-12 pt-8 border-t border-gray-200"
           >
-            <p className="text-sm text-gray-500">
-              Ready to improve your resume? Sign in to get started with AI-powered analysis
+            <p className="text-sm text-gray-500 mb-4">
+              Ready to find your dream job? Browse opportunities and apply with ease.
             </p>
+            <div className="flex justify-center space-x-8 text-xs text-gray-400">
+              <div className="flex items-center gap-2">
+                <span>🎯</span>
+                <span>Smart Matching</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span>📄</span>
+                <span>Easy Applications</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span>💼</span>
+                <span>Top Companies</span>
+              </div>
+            </div>
           </motion.div>
         </div>
       </div>
