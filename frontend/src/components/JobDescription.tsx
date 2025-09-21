@@ -1,11 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "./AuthProvider";
-import { supabase } from "@/lib/supabaseClient";
 import { Button } from "@/components/ui/button";
 import ResumeUpload from "./ResumeUpload";
 import AnalysisResults from "./AnalysisResults";
@@ -54,21 +53,26 @@ interface JobDescription {
   job_name?: string;
 }
 
+interface AnalysisResult {
+  score?: number;
+  feedback?: string[];
+  [key: string]: any; // For flexible analysis results
+}
+
 export default function JobDescription() {
+  // Environment variables with fallbacks for production
+  const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8003';
+  
   const [jobDescriptions, setJobDescriptions] = useState<JobDescription[]>([]);
   const [isLoadingJobs, setIsLoadingJobs] = useState(true);
   const [selectedJob, setSelectedJob] = useState<JobDescription | null>(null);
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const { user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const jobId = searchParams.get("id");
 
   // Analysis results state
-  const [analysisResults, setAnalysisResults] = useState<any>(null);
+  const [analysisResults, setAnalysisResults] = useState<AnalysisResult | null>(null);
 
   // Load job descriptions on component mount
   useEffect(() => {
@@ -93,7 +97,7 @@ export default function JobDescription() {
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/get-jobs`
+        `${API_BASE_URL}/api/get-jobs`
       );
 
       if (!response.ok) {
@@ -180,14 +184,10 @@ export default function JobDescription() {
 
   const handleJobSelect = (job: JobDescription) => {
     setSelectedJob(job);
-    setUploadedFile(null);
-    setShowSuccessMessage(false);
   };
 
   const handleBackToJobs = () => {
     setSelectedJob(null);
-    setUploadedFile(null);
-    setShowSuccessMessage(false);
   };
 
   if (isLoadingJobs) {
@@ -327,7 +327,7 @@ export default function JobDescription() {
           </div>
 
           {/* Job Header */}
-          {selectedJob && <JobHeader selectedJob={selectedJob} user={user} />}
+          {selectedJob && <JobHeader selectedJob={selectedJob} user={user || undefined} />}
 
           {/* Job Details */}
           {selectedJob && <JobDetails selectedJob={selectedJob} />}

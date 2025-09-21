@@ -1,16 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { supabase } from "@/lib/supabaseClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import MainLayout from "@/components/layouts/MainLayout";
 
-export default function StudentLoginPage() {
+function StudentLoginForm() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -220,5 +219,13 @@ export default function StudentLoginPage() {
         </motion.div>
       </div>
     </MainLayout>
+  );
+}
+
+export default function StudentLoginPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <StudentLoginForm />
+    </Suspense>
   );
 }

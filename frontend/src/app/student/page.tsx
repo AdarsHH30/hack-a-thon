@@ -5,13 +5,18 @@ import MainLayout from "@/components/layouts/MainLayout";
 import UploadForm from "@/components/UploadForm";
 import ResultCard from "@/components/ResultCard";
 
-export default function StudentPage() {
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [results, setResults] = useState<any>(null);
+interface AnalysisResults {
+  score: number;
+  feedback: string[];
+  strengths: string[];
+  improvements: string[];
+}
 
-  const handleFileUpload = async (file: File) => {
-    setUploadedFile(file);
+export default function StudentPage() {
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [results, setResults] = useState<AnalysisResults | null>(null);
+
+  const handleFileUpload = async (_file: File) => {
     setIsAnalyzing(true);
 
     // Simulate API call
@@ -74,7 +79,7 @@ export default function StudentPage() {
                   Resume Analysis Results
                 </h2>
                 <p className="text-muted-foreground">
-                  Here's how your resume performs and how to improve it
+                  Here&apos;s how your resume performs and how to improve it
                 </p>
               </div>
               <ResultCard {...results} />

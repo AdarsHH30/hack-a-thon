@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import MainLayout from "@/components/layouts/MainLayout";
 
-export default function AdminLoginPage() {
+function AdminLoginForm() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -240,6 +240,14 @@ export default function AdminLoginPage() {
         </motion.div>
       </div>
     </MainLayout>
+  );
+}
+
+export default function AdminLoginPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AdminLoginForm />
+    </Suspense>
   );
 }
 

@@ -9,8 +9,86 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+interface ProcessStages {
+  extraction?: string;
+  cleaning?: string;
+  ai_analysis?: string;
+}
+
+interface JobDescription {
+  company?: string;
+  position?: string;
+  source_type?: string;
+  text_length?: number;
+}
+
+interface Resume {
+  filename?: string;
+  text_length?: number;
+}
+
+interface InputInfo {
+  job_description?: JobDescription;
+  resume?: Resume;
+}
+
+interface AIAnalysisResults {
+  overall_assessment?: {
+    score?: number;
+    match_score?: number;
+    fit_analysis?: string;
+    recommendation?: string;
+    suitability_level?: string;
+    confidence_level?: string;
+    summary?: string;
+  };
+  skill_analysis?: {
+    matching_skills?: string[];
+    matched_skills?: string[];
+    missing_critical_skills?: string[];
+    transferable_skills?: string[];
+    skill_gaps?: string[];
+    technical_competency?: string;
+  };
+  experience_assessment?: {
+    level_match?: string;
+    domain_relevance?: string;
+    growth_trajectory?: string;
+  };
+  experience_analysis?: {
+    relevance?: string;
+    level?: string;
+    progression?: string;
+    domain_fit?: string;
+  };
+  suggestions?: {
+    immediate_improvements?: string[];
+    long_term_development?: string[];
+    interview_preparation?: string[];
+  };
+  improvement_recommendations?: {
+    immediate_actions?: string[];
+    skill_development?: string[];
+    experience_building?: string[];
+    resume_optimization?: string[];
+  };
+  strengths?: string[];
+}
+
+interface MatchResult {
+  score: number;
+  feedback?: string[];
+  strengths?: string[];
+  improvements?: string[];
+  keywordMatches?: string[];
+  missingSkills?: string[];
+  process_stages?: ProcessStages;
+  input_info?: InputInfo;
+  ai_analysis_results?: AIAnalysisResults;
+}
+
 interface AnalysisResultsProps {
-  analysisResults: any;
+  analysisResults: any; // Temporarily using any for flexibility
 }
 
 export default function AnalysisResults({

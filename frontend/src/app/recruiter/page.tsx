@@ -14,6 +14,9 @@ import {
 import MainLayout from "@/components/layouts/MainLayout";
 
 export default function RecruiterPage() {
+  // Environment variables with fallbacks for production
+  const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8003';
+  
   const [activeTab, setActiveTab] = useState("post-job");
   const [jobDescription, setJobDescription] = useState("");
   const [resumeFile, setResumeFile] = useState<File | null>(null);
@@ -87,7 +90,7 @@ export default function RecruiterPage() {
       formData.append("jd_file", jobFile);
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/job-description`,
+        `${API_BASE_URL}/api/job-description`,
         {
           method: "POST",
           body: formData,
@@ -122,7 +125,7 @@ export default function RecruiterPage() {
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-foreground">Post a Job</h2>
             <p className="text-muted-foreground">
-              Upload your job description and we'll take care of the rest. Just
+              Upload your job description and we&apos;ll take care of the rest. Just
               drop your PDF here and candidates will start seeing it right away.
             </p>
 
@@ -133,7 +136,7 @@ export default function RecruiterPage() {
                   Add Your Job Description
                 </h3>
                 <p className="text-muted-foreground mb-6">
-                  Just upload your job posting as a PDF - we'll handle
+                  Just upload your job posting as a PDF - we&apos;ll handle
                   everything else
                 </p>
 
@@ -375,7 +378,7 @@ export default function RecruiterPage() {
             </div>
             <div className="bg-card border border-border rounded-lg p-6">
               <h3 className="text-lg font-semibold text-foreground mb-4">
-                What's happening
+                What&apos;s happening
               </h3>
               <div className="space-y-3">
                 <div className="flex items-center gap-3 p-3 border border-border rounded-lg">
