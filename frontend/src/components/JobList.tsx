@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useAuth } from "./AuthProvider";
-import { supabase } from "@/lib/supabaseClient";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -28,15 +27,14 @@ interface JobDescription {
 }
 
 export default function JobList() {
+  // Environment variables with fallbacks for production
+  const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8003';
+  
   const [jobDescriptions, setJobDescriptions] = useState<JobDescription[]>([]);
   const [isLoadingJobs, setIsLoadingJobs] = useState(true);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [hasError, setHasError] = useState(false);
   const { user } = useAuth();
-
-  // Check if user is admin (you can implement proper role checking later)
-  const isAdmin =
-    user?.user_metadata?.role === "admin" || user?.email?.includes("admin");
 
   // Mock job data for fallback
   const mockJobs: JobDescription[] = [
@@ -173,7 +171,7 @@ export default function JobList() {
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/get-jobs`
+        `${API_BASE_URL}/api/get-jobs`
       );
 
       if (!response.ok) {
@@ -287,7 +285,7 @@ export default function JobList() {
             No Job Opportunities Yet
           </h3>
           <p className="text-muted-foreground mb-8 leading-relaxed">
-            We're constantly working to bring you the best career opportunities.
+            We&apos;re constantly working to bring you the best career opportunities.
             New positions are posted regularly, so check back soon or be the
             first to post a job opening!
           </p>

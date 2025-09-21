@@ -4,8 +4,15 @@ import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { Upload, FileText, X, CheckCircle, AlertCircle } from "lucide-react";
 
+interface UploadResponse {
+  success: boolean;
+  message: string;
+  job_id?: string;
+  filename?: string;
+}
+
 interface JDuploadProps {
-  onUploadSuccess?: (data: any) => void;
+  onUploadSuccess?: (data: UploadResponse) => void;
   onUploadError?: (error: string) => void;
 }
 
@@ -13,6 +20,9 @@ export default function JDupload({
   onUploadSuccess,
   onUploadError,
 }: JDuploadProps) {
+  // Environment variables with fallbacks for production
+  const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8003';
+  
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -99,7 +109,7 @@ export default function JDupload({
       }, 200);
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/job-description`,
+        `${API_BASE_URL}/api/job-description`,
         {
           method: "POST",
           body: formData,

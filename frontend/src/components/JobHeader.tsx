@@ -1,8 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 
 interface JobDescription {
   id: string;
@@ -15,12 +13,19 @@ interface JobDescription {
   salary?: string;
 }
 
-interface JobHeaderProps {
-  selectedJob: JobDescription;
-  user: any;
+interface User {
+  user_metadata?: {
+    name?: string;
+  };
+  email?: string;
 }
 
-export default function JobHeader({ selectedJob, user }: JobHeaderProps) {
+interface JobHeaderProps {
+  selectedJob: JobDescription;
+  user?: User;
+}
+
+export default function JobHeader({ selectedJob }: JobHeaderProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: -20 }}

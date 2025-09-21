@@ -14,9 +14,16 @@ import {
   BookOpen,
 } from "lucide-react";
 
+interface MatchResult {
+  success: boolean;
+  timestamp: string;
+  score?: number;
+  [key: string]: any; // For flexible result structure
+}
+
 interface ResumeUploadProps {
   jobId?: string;
-  onMatchComplete?: (results: any) => void;
+  onMatchComplete?: (results: MatchResult) => void;
 }
 
 interface MatchResults {
@@ -59,6 +66,9 @@ export default function ResumeUpload({
   jobId,
   onMatchComplete,
 }: ResumeUploadProps) {
+  // Environment variables with fallbacks for production
+  const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8003';
+  
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -144,7 +154,7 @@ export default function ResumeUpload({
       }, 200);
 
       const uploadResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/resume`,
+        `${API_BASE_URL}/api/resume`,
         {
           method: "POST",
           body: formData,
@@ -167,7 +177,7 @@ export default function ResumeUpload({
         setUploadProgress(75);
 
         const matchResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/match`,
+          `${API_BASE_URL}/api/match`,
           {
             method: "POST",
             headers: {
