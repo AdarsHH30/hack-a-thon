@@ -11,6 +11,7 @@ from .text_preprocessor import (
 )
 from .hard_matcher import HardMatcher, perform_hard_match
 from .semantic_matcher import SemanticMatcher, calculate_semantic_similarity
+from .extract import ResumeJobExtractor, analyze_resume_job_match
 
 __all__ = [
     "MatchingEngine",
@@ -23,6 +24,8 @@ __all__ = [
     "perform_hard_match",
     "SemanticMatcher",
     "calculate_semantic_similarity",
+    "ResumeJobExtractor",
+    "analyze_resume_job_match",
 ]
 
 __version__ = "1.0.0"

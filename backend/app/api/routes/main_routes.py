@@ -155,7 +155,7 @@ async def upload_job_description(
                 "filename": jd_file.filename if jd_file else None,
                 "document_type": extraction_result.get("document_type"),
                 "structured_data": {},
-                "cleaning_status": "failed"
+                "cleaning_status": "failed",
             }
             job_storage.append(job_data)
             jobs_created = 1
@@ -176,11 +176,13 @@ async def upload_job_description(
                 # For multiple jobs, split the raw text proportionally
                 if multiple_jobs and job_count > 1:
                     # Simple text splitting - in production, you'd want more sophisticated splitting
-                    text_chunks = final_jd_text.split('\n\n')
+                    text_chunks = final_jd_text.split("\n\n")
                     chunk_size = len(text_chunks) // job_count
                     start_idx = i * chunk_size
-                    end_idx = (i + 1) * chunk_size if i < job_count - 1 else len(text_chunks)
-                    job_text = '\n\n'.join(text_chunks[start_idx:end_idx])
+                    end_idx = (
+                        (i + 1) * chunk_size if i < job_count - 1 else len(text_chunks)
+                    )
+                    job_text = "\n\n".join(text_chunks[start_idx:end_idx])
                 else:
                     job_text = final_jd_text
 
@@ -189,12 +191,20 @@ async def upload_job_description(
                     "text": job_text,
                     "source_type": source_type,
                     "uploaded_at": datetime.now().isoformat(),
-                    "filename": jd_file.filename if jd_file else f"{jd_file.filename}_job_{i+1}" if multiple_jobs else jd_file.filename,
+                    "filename": (
+                        jd_file.filename
+                        if jd_file
+                        else (
+                            f"{jd_file.filename}_job_{i+1}"
+                            if multiple_jobs
+                            else jd_file.filename
+                        )
+                    ),
                     "document_type": extraction_result.get("document_type"),
                     "structured_data": job_structured_data,
                     "cleaning_status": "success",
                     "job_index": i + 1 if multiple_jobs else 1,
-                    "total_jobs_in_document": job_count
+                    "total_jobs_in_document": job_count,
                 }
 
                 job_storage.append(job_data)
@@ -222,8 +232,14 @@ async def upload_job_description(
             "source_type": source_type,
             "text_length": len(final_jd_text),
             "jobs_created": jobs_created,
-            "uploaded_job_ids": uploaded_job_ids if 'uploaded_job_ids' in locals() else [len(job_storage)],
-            "cleaning_status": "success" if cleaning_result.get("success", False) else "failed",
+            "uploaded_job_ids": (
+                uploaded_job_ids
+                if "uploaded_job_ids" in locals()
+                else [len(job_storage)]
+            ),
+            "cleaning_status": (
+                "success" if cleaning_result.get("success", False) else "failed"
+            ),
             "next_step": "Upload resume to start matching process",
             "timestamp": datetime.now().isoformat(),
         }
@@ -374,7 +390,7 @@ async def _trigger_matching_process():
 
         if not jd_data:
             raise HTTPException(status_code=400, detail="No job descriptions available")
-        
+
         jd_text = jd_data["text"]
         resume_text = resume_data["text"]
 
@@ -409,21 +425,53 @@ async def _trigger_matching_process():
 
         print("✅ Stage 1 completed: Data cleaning")
 
-        # Stage 2: Matching
-        print("🎯 Stage 2: Performing matching...")
+        # Stage 2: Direct Groq AI Analysis
+        print("🤖 Stage 2: Performing direct Groq AI matching analysis...")
 
-        matching_result = match_resume_to_job(cleaned_resume_text, cleaned_jd_text)
-
-        if not matching_result.get("success", False):
+        # Import the AI extractor
+        try:
+            from app.services.matching.extract import analyze_resume_job_match
+        except ImportError as e:
+            print(f"❌ Failed to import AI extractor: {e}")
             raise HTTPException(
-                status_code=500,
-                detail=f"Matching failed: {matching_result.get('error', 'Unknown error')}",
+                status_code=500, detail="AI analysis module not available"
             )
 
-        print("✅ Stage 2 completed: Matching")
+        # Get candidate name and job title for better analysis
+        candidate_name = None
+        job_title = (
+            jd_data.get("structured_data", {}).get("job_title") or "Unknown Position"
+        )
+
+        # Try to extract candidate name from resume data
+        if resume_cleaning_result.get("success", False):
+            structured_resume = resume_cleaning_result.get("structured_data", {})
+            candidate_name = structured_resume.get("name") or structured_resume.get(
+                "full_name"
+            )
+
+        # Perform direct Groq AI analysis
+        matching_result = analyze_resume_job_match(
+            resume_text=cleaned_resume_text,
+            job_description_text=cleaned_jd_text,
+            candidate_name=candidate_name,
+            job_title=job_title,
+        )
+
+        if not matching_result.get("success", False):
+            print(f"⚠️ AI analysis failed, but continuing with available results")
+
+        print("✅ Stage 2 completed: Direct Groq AI Analysis")
 
         # Stage 3: Format final results
-        print("📊 Stage 3: Formatting results...")
+        print("📊 Stage 3: Formatting AI analysis results...")
+
+        # Extract key information from AI analysis
+        overall_assessment = matching_result.get("overall_assessment", {})
+        skill_analysis = matching_result.get("skill_analysis", {})
+        improvement_recommendations = matching_result.get(
+            "improvement_recommendations", {}
+        )
 
         final_results = {
             "success": True,
@@ -431,7 +479,7 @@ async def _trigger_matching_process():
             "process_stages": {
                 "extraction": "completed",
                 "cleaning": "completed",
-                "matching": "completed",
+                "ai_analysis": "completed",
             },
             "input_info": {
                 "job_description": {
@@ -447,23 +495,27 @@ async def _trigger_matching_process():
                     "text_length": len(resume_text),
                 },
             },
-            "matching_results": {
-                "score": matching_result.get("relevance_score"),
-                "verdict": matching_result.get("verdict"),
-                "matched_skills": matching_result.get("matched_skills", []),
-                "missing_skills": matching_result.get("missing_skills", []),
-                "suggestions": matching_result.get("suggestions", []),
-                "areas_for_improvement": matching_result.get("missing_skills", [])[
-                    :5
-                ],  # Top 5
-                "detailed_analysis": matching_result.get("detailed_analysis", {}),
-                "score_breakdown": matching_result.get("score_breakdown", {}),
+            "ai_analysis_results": {
+                "overall_assessment": overall_assessment,
+                "skill_analysis": skill_analysis,
+                "experience_analysis": matching_result.get("experience_analysis", {}),
+                "improvement_recommendations": improvement_recommendations,
+                "strengths": matching_result.get("strengths", []),
+                "concerns": matching_result.get("concerns", []),
+                "recommendation": matching_result.get("recommendation", {}),
             },
+            # Legacy compatibility fields
+            "score": overall_assessment.get("match_score", 0),
+            "verdict": overall_assessment.get("suitability_level", "Unknown"),
+            "matched_skills": skill_analysis.get("matched_skills", []),
+            "missing_skills": skill_analysis.get("missing_critical_skills", []),
+            "suggestions": improvement_recommendations.get("immediate_actions", []),
+            "areas_for_improvement": skill_analysis.get("skill_gaps", [])[:5],  # Top 5
         }
 
-        print("🎉 Complete matching process finished successfully!")
-        print(f"📈 Final Score: {final_results['matching_results']['score']}%")
-        print(f"🏆 Verdict: {final_results['matching_results']['verdict']}")
+        print("🎉 Complete AI analysis process finished successfully!")
+        print(f"📈 Match Score: {final_results['score']}%")
+        print(f"🏆 Suitability: {final_results['verdict']}")
 
         return final_results
 
@@ -666,14 +718,21 @@ async def get_matching_score(
     job_id: str = Form(..., description="Job ID to match against"),
 ):
     """
-    Upload resume and get matching score for a specific job
+    Upload resume and get AI-powered matching analysis for a specific job
+
+    This endpoint uses direct Groq AI analysis to provide:
+    - Comprehensive match scoring (0-100)
+    - Detailed skill analysis
+    - Experience assessment
+    - Personalized improvement recommendations
+    - Professional HR-style analysis
 
     Args:
         resume_file: PDF file containing resume
         job_id: ID of the job description to match against
 
     Returns:
-        Matching score and basic information
+        Comprehensive AI analysis with scoring and improvement recommendations
     """
     try:
         print(f"📄 Get-score request received for job_id: {job_id}")
@@ -761,23 +820,48 @@ async def get_matching_score(
 
             print("✅ Data cleaning completed")
 
-            # Stage 2: Matching
-            print("🎯 Performing matching...")
+            # Stage 2: Direct Groq AI Analysis
+            print("🤖 Performing direct Groq AI matching analysis...")
 
-            matching_result = match_resume_to_job(cleaned_resume_text, cleaned_jd_text)
-
-            if not matching_result.get("success", False):
+            # Import the AI extractor
+            try:
+                from app.services.matching.extract import analyze_resume_job_match
+            except ImportError as e:
+                print(f"❌ Failed to import AI extractor: {e}")
                 raise HTTPException(
-                    status_code=500,
-                    detail=f"Matching failed: {matching_result.get('error', 'Unknown error')}",
+                    status_code=500, detail="AI analysis module not available"
                 )
 
-            print("✅ Matching completed")
+            # Get candidate name and job title for better analysis
+            candidate_name = None
+            job_title = (
+                job_data.get("structured_data", {}).get("job_title")
+                or "Unknown Position"
+            )
 
-            # Return simplified score response
-            score_response = {
-                "success": True,
-                "timestamp": datetime.now().isoformat(),
+            # Try to extract candidate name from resume data
+            if resume_cleaning_result.get("success", False):
+                structured_resume = resume_cleaning_result.get("structured_data", {})
+                candidate_name = structured_resume.get("name") or structured_resume.get(
+                    "full_name"
+                )
+
+            # Perform direct Groq AI analysis
+            matching_result = analyze_resume_job_match(
+                resume_text=cleaned_resume_text,
+                job_description_text=cleaned_jd_text,
+                candidate_name=candidate_name,
+                job_title=job_title,
+            )
+
+            if not matching_result.get("success", False):
+                print(f"⚠️ AI analysis failed, but continuing with available results")
+
+            print("✅ Direct Groq AI matching completed")
+
+            # Return the full AI analysis result with additional metadata
+            analysis_response = {
+                **matching_result,  # Include all extract.py results
                 "job_id": job_id,
                 "job_info": {
                     "company": job_data.get("structured_data", {}).get("company")
@@ -789,16 +873,19 @@ async def get_matching_score(
                     "filename": resume_file.filename,
                     "text_length": len(resume_text),
                 },
-                "score": matching_result.get("relevance_score"),
-                "verdict": matching_result.get("verdict"),
-                "matched_skills": matching_result.get("matched_skills", []),
-                "missing_skills": matching_result.get("missing_skills", []),
-                "suggestions": matching_result.get("suggestions", []),
+                "processing_metadata": {
+                    "data_cleaning_performed": True,
+                    "ai_analysis_used": True,
+                    "model_version": "groq-llama-3.1-8b-instant",
+                    "matching_approach": "direct_groq_ai",
+                },
             }
 
-            print(f"🎉 Score calculation completed! Score: {score_response['score']}%")
+            print(
+                f"🎉 Direct Groq AI analysis completed! Match Score: {matching_result.get('score', 'N/A')}%"
+            )
 
-            return score_response
+            return analysis_response
 
         finally:
             # Clean up temp file
@@ -815,6 +902,65 @@ async def get_matching_score(
         raise HTTPException(
             status_code=500, detail=f"Error calculating score: {str(e)}"
         )
+
+
+@router.post("/ai-analyze")
+async def ai_powered_analysis(
+    resume_text: str = Form(..., description="Raw resume text"),
+    job_description_text: str = Form(..., description="Raw job description text"),
+    candidate_name: Optional[str] = Form(None, description="Optional candidate name"),
+    job_title: Optional[str] = Form(None, description="Optional job title"),
+):
+    """
+    AI-powered comprehensive resume-job matching analysis
+
+    Args:
+        resume_text: Raw resume text content
+        job_description_text: Raw job description text content
+        candidate_name: Optional candidate name for personalized analysis
+        job_title: Optional job title for context
+
+    Returns:
+        Comprehensive AI analysis with scoring and improvement recommendations
+    """
+    try:
+        print("🤖 AI-powered analysis request received")
+        print(f"📄 Resume length: {len(resume_text)} characters")
+        print(f"📄 Job description length: {len(job_description_text)} characters")
+
+        # Import the AI extractor
+        try:
+            from app.services.matching.extract import analyze_resume_job_match
+        except ImportError:
+            raise HTTPException(
+                status_code=500, detail="AI analysis module not available"
+            )
+
+        # Perform AI-powered analysis
+        analysis_result = analyze_resume_job_match(
+            resume_text=resume_text,
+            job_description_text=job_description_text,
+            candidate_name=candidate_name,
+            job_title=job_title,
+        )
+
+        if not analysis_result.get("success", False):
+            # Return fallback results but still indicate it's not full AI analysis
+            analysis_result["note"] = (
+                "AI analysis unavailable, showing basic keyword matching results"
+            )
+
+        print("✅ AI analysis completed successfully")
+        return analysis_result
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error in AI analysis endpoint: {str(e)}")
+        import traceback
+
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error in AI analysis: {str(e)}")
 
 
 @router.delete("/reset")

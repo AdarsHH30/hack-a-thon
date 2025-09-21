@@ -218,25 +218,20 @@ class SemanticMatcher:
             return 0.0
 
         try:
-            if self.model is not None or self.tfidf_vectorizer is not None:
-                # Use proper embeddings
-                embeddings = self.encode_texts([text1, text2])
+            # Try to use embeddings (Sentence-BERT or TF-IDF)
+            embeddings = self.encode_texts([text1, text2])
 
-                if SKLEARN_AVAILABLE:
-                    similarity = cosine_similarity([embeddings[0]], [embeddings[1]])[0][
-                        0
-                    ]
-                else:
-                    # Manual cosine similarity calculation
-                    similarity = self._manual_cosine_similarity(
-                        embeddings[0], embeddings[1]
-                    )
-
-                return max(0.0, min(1.0, similarity))  # Ensure between 0 and 1
-
+            if SKLEARN_AVAILABLE:
+                similarity = cosine_similarity([embeddings[0]], [embeddings[1]])[0][
+                    0
+                ]
             else:
-                # Basic text overlap similarity
-                return self._basic_text_similarity(text1, text2)
+                # Manual cosine similarity calculation
+                similarity = self._manual_cosine_similarity(
+                    embeddings[0], embeddings[1]
+                )
+
+            return max(0.0, min(1.0, similarity))  # Ensure between 0 and 1
 
         except Exception as e:
             print(f"Error calculating similarity: {e}")
@@ -427,7 +422,8 @@ class SemanticMatcher:
         cache_file = Path(self.cache_dir) / f"{cache_key}_embeddings.pkl"
 
         try:
-            embeddings = self.encode_texts(texts)
+        
+            embeddings = self.encode_texts(texts, use_cache=False)
             with open(cache_file, "wb") as f:
                 pickle.dump(embeddings, f)
             print(f"✅ Embeddings cached to {cache_file}")
