@@ -84,10 +84,10 @@ export default function RecruiterPage() {
     setIsUploading(true);
     try {
       const formData = new FormData();
-      formData.append("file", jobFile);
+      formData.append("jd_file", jobFile);
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/upload-job-description`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/job-description`,
         {
           method: "POST",
           body: formData,
