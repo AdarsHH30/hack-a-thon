@@ -7,7 +7,10 @@ interface MainLayoutProps {
 
 const InnomaticsLogo = () => {
   return (
-    <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+    <Link
+      href="/"
+      className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+    >
       {/* Logo Icon */}
       <div className="relative w-8 h-8">
         <div className="absolute inset-0 bg-gradient-to-br from-innomatics-red to-innomatics-purple rounded-lg"></div>
@@ -15,7 +18,7 @@ const InnomaticsLogo = () => {
           <div className="w-3 h-3 bg-gradient-to-br from-innomatics-blue to-innomatics-purple rounded-full"></div>
         </div>
       </div>
-      
+
       {/* Logo Text */}
       <div className="flex flex-col">
         <span className="text-lg font-black text-foreground leading-none tracking-tight">
@@ -39,13 +42,19 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
           {/* Navigation Items */}
           <div className="flex items-center gap-6">
-            <Link href="/job-list" className="text-foreground hover:text-innomatics-blue transition-colors font-medium">
+            <Link
+              href="/job-list"
+              className="text-foreground hover:text-innomatics-blue transition-colors font-medium"
+            >
               Jobs
             </Link>
-            <Link href="/recruiter" className="text-foreground hover:text-innomatics-blue transition-colors font-medium">
+            <Link
+              href="/recruiter"
+              className="text-foreground hover:text-innomatics-blue transition-colors font-medium"
+            >
               For Employers
             </Link>
-            
+
             {/* Auth Buttons */}
             <div className="flex items-center gap-3">
               <Link href="/login">

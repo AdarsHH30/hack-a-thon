@@ -120,11 +120,10 @@ export default function RecruiterPage() {
       case "post-job":
         return (
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-foreground">
-              Post a Job
-            </h2>
+            <h2 className="text-2xl font-bold text-foreground">Post a Job</h2>
             <p className="text-muted-foreground">
-              Upload your job description and we'll take care of the rest. Just drop your PDF here and candidates will start seeing it right away.
+              Upload your job description and we'll take care of the rest. Just
+              drop your PDF here and candidates will start seeing it right away.
             </p>
 
             <div className="bg-card border border-border rounded-lg p-8">
@@ -134,7 +133,8 @@ export default function RecruiterPage() {
                   Add Your Job Description
                 </h3>
                 <p className="text-muted-foreground mb-6">
-                  Just upload your job posting as a PDF - we'll handle everything else
+                  Just upload your job posting as a PDF - we'll handle
+                  everything else
                 </p>
 
                 <div className="max-w-md mx-auto">
@@ -210,7 +210,9 @@ export default function RecruiterPage() {
               </h4>
               <ul className="text-sm text-innomatics-blue/80 space-y-1">
                 <li>• Include all the important details in your PDF</li>
-                <li>• Add salary info if you can - candidates love transparency</li>
+                <li>
+                  • Add salary info if you can - candidates love transparency
+                </li>
                 <li>• Keep it under 10MB for quick processing</li>
                 <li>• Text should be selectable (not just images)</li>
               </ul>
@@ -255,7 +257,9 @@ export default function RecruiterPage() {
                       </p>
                       <div className="flex items-center gap-4">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium">Match Score:</span>
+                          <span className="text-sm font-medium">
+                            Match Score:
+                          </span>
                           <span
                             className={`px-2 py-1 rounded text-sm font-medium ${
                               candidate.score >= 90
@@ -298,7 +302,8 @@ export default function RecruiterPage() {
                   Quick Resume Review
                 </h3>
                 <p className="text-muted-foreground mb-6">
-                  Drop a resume here and get instant feedback on how well it matches your needs
+                  Drop a resume here and get instant feedback on how well it
+                  matches your needs
                 </p>
                 <div className="max-w-md mx-auto">
                   <input
