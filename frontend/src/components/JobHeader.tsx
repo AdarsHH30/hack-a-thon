@@ -27,53 +27,6 @@ export default function JobHeader({ selectedJob, user }: JobHeaderProps) {
       animate={{ opacity: 1, y: 0 }}
       className="mb-8"
     >
-      <div className="flex justify-between items-start mb-6">
-        <Link
-          href="/job-list"
-          className="flex items-center transition-colors font-medium"
-          style={{ color: "hsl(var(--blue-600))" }}
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.color = "hsl(var(--blue-800))")
-          }
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.color = "hsl(var(--blue-600))")
-          }
-        >
-          <span className="mr-2 text-xl">←</span>
-          Back to all jobs
-        </Link>
-        <div className="flex items-center space-x-4">
-          {user ? (
-            <div className="flex items-center space-x-3">
-              <div
-                className="w-8 h-8 rounded-full flex items-center justify-center font-semibold"
-                style={{
-                  backgroundColor: "hsl(var(--blue-500))",
-                  color: "hsl(var(--white))",
-                }}
-              >
-                {(user?.user_metadata?.name ||
-                  user?.email ||
-                  "U")[0].toUpperCase()}
-              </div>
-            </div>
-          ) : (
-            <div className="flex space-x-3">
-              <Link href="/student-login">
-                <Button variant="outline" size="sm" className="font-medium">
-                  Student Login
-                </Button>
-              </Link>
-              <Link href="/admin-login">
-                <Button variant="outline" size="sm" className="font-medium">
-                  Admin Login
-                </Button>
-              </Link>
-            </div>
-          )}
-        </div>
-      </div>
-
       {/* Job Title Section */}
       <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">

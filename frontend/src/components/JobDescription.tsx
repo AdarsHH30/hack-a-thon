@@ -219,31 +219,49 @@ export default function JobDescription() {
     );
   }
 
+  // If no specific job selected, show a generic job posting page with resume upload
   if (!selectedJob) {
-    return (
-      <div
-        className="min-h-screen p-6"
-        style={{
-          background:
-            "linear-gradient(to bottom right, hsl(var(--gradient-primary-start)), hsl(var(--gradient-primary-middle)), hsl(var(--gradient-primary-end)))",
-        }}
-      >
-        <div className="max-w-4xl mx-auto text-center">
-          <h1
-            className="text-2xl font-bold mb-4"
-            style={{ color: "hsl(var(--gray-900))" }}
-          >
-            Job Not Found
-          </h1>
-          <p className="mb-6" style={{ color: "hsl(var(--gray-600))" }}>
-            The job you're looking for doesn't exist or has been removed.
-          </p>
-          <Link href="/job-list">
-            <Button>Back to Job List</Button>
-          </Link>
-        </div>
-      </div>
-    );
+    const fallbackJob: JobDescription = {
+      id: "general-application",
+      title: "General Application",
+      company: "Various Companies",
+      location: "Multiple Locations",
+      type: "Full-time / Part-time / Internship",
+      postedDate: new Date().toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      }),
+      description:
+        "We're always looking for talented individuals to join our team! Upload your resume and we'll match you with the best opportunities that align with your skills and experience. Our AI-powered system will analyze your profile and suggest positions from various companies in our network.",
+      requirements: [
+        "Strong communication skills",
+        "Problem-solving abilities",
+        "Teamwork and collaboration",
+        "Adaptability and learning mindset",
+        "Technical skills relevant to your field",
+      ],
+      responsibilities: [
+        "Contribute to meaningful projects",
+        "Collaborate with cross-functional teams",
+        "Continuous learning and skill development",
+        "Innovation and creative problem solving",
+      ],
+      benefits: [
+        "Competitive compensation packages",
+        "Professional development opportunities",
+        "Flexible working arrangements",
+        "Health and wellness benefits",
+        "Career advancement paths",
+      ],
+      qualifications: {
+        education: ["Bachelor's degree or equivalent experience"],
+        experience: "Entry level to experienced professionals welcome",
+        certifications: ["Industry-relevant certifications preferred"],
+      },
+    };
+
+    setSelectedJob(fallbackJob);
   }
 
   return (
@@ -309,10 +327,10 @@ export default function JobDescription() {
           </div>
 
           {/* Job Header */}
-          <JobHeader selectedJob={selectedJob} user={user} />
+          {selectedJob && <JobHeader selectedJob={selectedJob} user={user} />}
 
           {/* Job Details */}
-          <JobDetails selectedJob={selectedJob} />
+          {selectedJob && <JobDetails selectedJob={selectedJob} />}
         </motion.div>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
