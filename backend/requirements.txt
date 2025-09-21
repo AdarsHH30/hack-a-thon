@@ -1,5 +1,5 @@
 fastapi==0.117.1
-fitz==0.0.1.dev2
+PyMuPDF==1.24.14
 fuzzywuzzy==0.18.0
 Jinja2==3.1.6
 nltk==3.9.1
@@ -10,5 +10,4 @@ python-multipart==0.0.20
 rapidfuzz==3.14.1
 Requests==2.32.5
 scikit_learn==1.7.2
-sentence_transformers==3.1.1
 uvicorn==0.3
