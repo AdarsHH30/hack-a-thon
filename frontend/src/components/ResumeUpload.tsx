@@ -2,7 +2,17 @@
 
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, FileText, X, CheckCircle, AlertCircle, Target, TrendingUp, Award, BookOpen } from "lucide-react";
+import {
+  Upload,
+  FileText,
+  X,
+  CheckCircle,
+  AlertCircle,
+  Target,
+  TrendingUp,
+  Award,
+  BookOpen,
+} from "lucide-react";
 
 interface ResumeUploadProps {
   jobId?: string;
@@ -45,12 +55,17 @@ interface MatchResults {
   };
 }
 
-export default function ResumeUpload({ jobId, onMatchComplete }: ResumeUploadProps) {
+export default function ResumeUpload({
+  jobId,
+  onMatchComplete,
+}: ResumeUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [uploadStatus, setUploadStatus] = useState<"idle" | "success" | "error">("idle");
+  const [uploadStatus, setUploadStatus] = useState<
+    "idle" | "success" | "error"
+  >("idle");
   const [errorMessage, setErrorMessage] = useState("");
   const [matchResults, setMatchResults] = useState<MatchResults | null>(null);
   const [isMatching, setIsMatching] = useState(false);
@@ -184,7 +199,6 @@ export default function ResumeUpload({ jobId, onMatchComplete }: ResumeUploadPro
       setTimeout(() => {
         setUploadProgress(0);
       }, 1000);
-
     } catch (error) {
       console.error("Upload/Matching error:", error);
       setUploadStatus("error");
@@ -274,7 +288,8 @@ export default function ResumeUpload({ jobId, onMatchComplete }: ResumeUploadPro
                   />
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  {isMatching ? "Analyzing match..." : "Uploading..."} {uploadProgress}%
+                  {isMatching ? "Analyzing match..." : "Uploading..."}{" "}
+                  {uploadProgress}%
                 </p>
               </div>
             )}
@@ -347,23 +362,26 @@ export default function ResumeUpload({ jobId, onMatchComplete }: ResumeUploadPro
       </motion.div>
 
       {/* Upload Button */}
-      {uploadedFile && !isUploading && !isMatching && uploadStatus !== "success" && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex justify-center"
-        >
-          <motion.button
-            onClick={handleUpload}
-            className="px-8 py-3 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-colors shadow-lg"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            disabled={!uploadedFile}
+      {uploadedFile &&
+        !isUploading &&
+        !isMatching &&
+        uploadStatus !== "success" && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex justify-center"
           >
-            {jobId ? "Upload & Analyze Match" : "Upload Resume"}
-          </motion.button>
-        </motion.div>
-      )}
+            <motion.button
+              onClick={handleUpload}
+              className="px-8 py-3 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-colors shadow-lg"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              disabled={!uploadedFile}
+            >
+              {jobId ? "Upload & Analyze Match" : "Upload Resume"}
+            </motion.button>
+          </motion.div>
+        )}
 
       {/* Matching Results */}
       <AnimatePresence>
@@ -377,8 +395,16 @@ export default function ResumeUpload({ jobId, onMatchComplete }: ResumeUploadPro
             {/* Score Overview */}
             <div className="bg-card border border-border rounded-xl p-6">
               <div className="text-center mb-6">
-                <div className={`inline-flex items-center justify-center w-24 h-24 rounded-full ${getScoreBgColor(matchResults.matching_results.score)} mb-4`}>
-                  <span className={`text-3xl font-bold ${getScoreColor(matchResults.matching_results.score)}`}>
+                <div
+                  className={`inline-flex items-center justify-center w-24 h-24 rounded-full ${getScoreBgColor(
+                    matchResults.matching_results.score
+                  )} mb-4`}
+                >
+                  <span
+                    className={`text-3xl font-bold ${getScoreColor(
+                      matchResults.matching_results.score
+                    )}`}
+                  >
                     {matchResults.matching_results.score.toFixed(1)}%
                   </span>
                 </div>
@@ -394,21 +420,36 @@ export default function ResumeUpload({ jobId, onMatchComplete }: ResumeUploadPro
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div className="text-center p-4 bg-secondary/50 rounded-lg">
                   <div className="text-2xl font-bold text-foreground">
-                    {matchResults.matching_results.score_breakdown.hard_match_score.toFixed(1)}%
+                    {matchResults.matching_results.score_breakdown.hard_match_score.toFixed(
+                      1
+                    )}
+                    %
                   </div>
-                  <div className="text-sm text-muted-foreground">Hard Match</div>
+                  <div className="text-sm text-muted-foreground">
+                    Hard Match
+                  </div>
                 </div>
                 <div className="text-center p-4 bg-secondary/50 rounded-lg">
                   <div className="text-2xl font-bold text-foreground">
-                    {matchResults.matching_results.score_breakdown.semantic_score.toFixed(1)}%
+                    {matchResults.matching_results.score_breakdown.semantic_score.toFixed(
+                      1
+                    )}
+                    %
                   </div>
-                  <div className="text-sm text-muted-foreground">Semantic Match</div>
+                  <div className="text-sm text-muted-foreground">
+                    Semantic Match
+                  </div>
                 </div>
                 <div className="text-center p-4 bg-secondary/50 rounded-lg">
                   <div className="text-2xl font-bold text-foreground">
-                    {matchResults.matching_results.score_breakdown.final_score.toFixed(1)}%
+                    {matchResults.matching_results.score_breakdown.final_score.toFixed(
+                      1
+                    )}
+                    %
                   </div>
-                  <div className="text-sm text-muted-foreground">Final Score</div>
+                  <div className="text-sm text-muted-foreground">
+                    Final Score
+                  </div>
                 </div>
               </div>
             </div>
@@ -419,17 +460,21 @@ export default function ResumeUpload({ jobId, onMatchComplete }: ResumeUploadPro
               <div className="bg-card border border-border rounded-xl p-6">
                 <div className="flex items-center mb-4">
                   <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
-                  <h4 className="text-lg font-semibold text-foreground">Matched Skills</h4>
+                  <h4 className="text-lg font-semibold text-foreground">
+                    Matched Skills
+                  </h4>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {matchResults.matching_results.matched_skills.map((skill, index) => (
-                    <span
-                      key={index}
-                      className="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full"
-                    >
-                      {skill}
-                    </span>
-                  ))}
+                  {matchResults.matching_results.matched_skills.map(
+                    (skill, index) => (
+                      <span
+                        key={index}
+                        className="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full"
+                      >
+                        {skill}
+                      </span>
+                    )
+                  )}
                 </div>
               </div>
 
@@ -437,17 +482,21 @@ export default function ResumeUpload({ jobId, onMatchComplete }: ResumeUploadPro
               <div className="bg-card border border-border rounded-xl p-6">
                 <div className="flex items-center mb-4">
                   <AlertCircle className="w-5 h-5 text-red-600 mr-2" />
-                  <h4 className="text-lg font-semibold text-foreground">Missing Skills</h4>
+                  <h4 className="text-lg font-semibold text-foreground">
+                    Missing Skills
+                  </h4>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {matchResults.matching_results.missing_skills.map((skill, index) => (
-                    <span
-                      key={index}
-                      className="px-3 py-1 bg-red-100 text-red-800 text-sm font-medium rounded-full"
-                    >
-                      {skill}
-                    </span>
-                  ))}
+                  {matchResults.matching_results.missing_skills.map(
+                    (skill, index) => (
+                      <span
+                        key={index}
+                        className="px-3 py-1 bg-red-100 text-red-800 text-sm font-medium rounded-full"
+                      >
+                        {skill}
+                      </span>
+                    )
+                  )}
                 </div>
               </div>
             </div>
@@ -456,15 +505,19 @@ export default function ResumeUpload({ jobId, onMatchComplete }: ResumeUploadPro
             <div className="bg-card border border-border rounded-xl p-6">
               <div className="flex items-center mb-4">
                 <Target className="w-5 h-5 text-blue-600 mr-2" />
-                <h4 className="text-lg font-semibold text-foreground">Suggestions</h4>
+                <h4 className="text-lg font-semibold text-foreground">
+                  Suggestions
+                </h4>
               </div>
               <ul className="space-y-2">
-                {matchResults.matching_results.suggestions.map((suggestion, index) => (
-                  <li key={index} className="flex items-start">
-                    <span className="text-blue-600 mr-2">•</span>
-                    <span className="text-foreground">{suggestion}</span>
-                  </li>
-                ))}
+                {matchResults.matching_results.suggestions.map(
+                  (suggestion, index) => (
+                    <li key={index} className="flex items-start">
+                      <span className="text-blue-600 mr-2">•</span>
+                      <span className="text-foreground">{suggestion}</span>
+                    </li>
+                  )
+                )}
               </ul>
             </div>
 
@@ -472,20 +525,31 @@ export default function ResumeUpload({ jobId, onMatchComplete }: ResumeUploadPro
             <div className="bg-card border border-border rounded-xl p-6">
               <div className="flex items-center mb-4">
                 <TrendingUp className="w-5 h-5 text-purple-600 mr-2" />
-                <h4 className="text-lg font-semibold text-foreground">Skill Categories Analysis</h4>
+                <h4 className="text-lg font-semibold text-foreground">
+                  Skill Categories Analysis
+                </h4>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {Object.entries(matchResults.matching_results.detailed_analysis.skill_categories_analysis).map(([category, analysis]) => (
-                  <div key={category} className="p-4 bg-secondary/50 rounded-lg">
+                {Object.entries(
+                  matchResults.matching_results.detailed_analysis
+                    .skill_categories_analysis
+                ).map(([category, analysis]) => (
+                  <div
+                    key={category}
+                    className="p-4 bg-secondary/50 rounded-lg"
+                  >
                     <h5 className="font-medium text-foreground mb-2 capitalize">
-                      {category.replace(/_/g, ' ')}
+                      {category.replace(/_/g, " ")}
                     </h5>
                     <div className="text-2xl font-bold text-foreground mb-1">
                       {analysis.match_rate}%
                     </div>
-                    <div className="text-sm text-muted-foreground mb-2">Match Rate</div>
+                    <div className="text-sm text-muted-foreground mb-2">
+                      Match Rate
+                    </div>
                     <div className="text-xs text-muted-foreground">
-                      {analysis.matched_skills.length}/{analysis.total_required} skills
+                      {analysis.matched_skills.length}/{analysis.total_required}{" "}
+                      skills
                     </div>
                   </div>
                 ))}
@@ -496,15 +560,19 @@ export default function ResumeUpload({ jobId, onMatchComplete }: ResumeUploadPro
             <div className="bg-card border border-border rounded-xl p-6">
               <div className="flex items-center mb-4">
                 <Award className="w-5 h-5 text-green-600 mr-2" />
-                <h4 className="text-lg font-semibold text-foreground">Strengths</h4>
+                <h4 className="text-lg font-semibold text-foreground">
+                  Strengths
+                </h4>
               </div>
               <ul className="space-y-2">
-                {matchResults.matching_results.detailed_analysis.strengths.map((strength, index) => (
-                  <li key={index} className="flex items-start">
-                    <span className="text-green-600 mr-2">✓</span>
-                    <span className="text-foreground">{strength}</span>
-                  </li>
-                ))}
+                {matchResults.matching_results.detailed_analysis.strengths.map(
+                  (strength, index) => (
+                    <li key={index} className="flex items-start">
+                      <span className="text-green-600 mr-2">✓</span>
+                      <span className="text-foreground">{strength}</span>
+                    </li>
+                  )
+                )}
               </ul>
             </div>
           </motion.div>
