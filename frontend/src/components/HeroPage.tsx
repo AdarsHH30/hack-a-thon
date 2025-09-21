@@ -71,7 +71,7 @@ const InnomaticsHero = memo(function InnomaticsHero() {
                 whileTap={{ scale: 0.98 }}
                 className="w-full bg-foreground text-background px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 hover:shadow-lg flex items-center justify-center gap-2"
               >
-                Find your next job
+                Explore jobs
                 <ArrowRight className="w-5 h-5" />
               </motion.button>
             </Link>
@@ -82,7 +82,7 @@ const InnomaticsHero = memo(function InnomaticsHero() {
                 whileTap={{ scale: 0.98 }}
                 className="w-full border border-border bg-background text-foreground px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 hover:bg-muted"
               >
-                Find your next hire
+                Post a job
               </motion.button>
             </Link>
           </motion.div>
