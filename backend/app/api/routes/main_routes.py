@@ -247,7 +247,7 @@ async def upload_resume(
             print(f"✅ Resume uploaded. Length: {len(resume_text)} characters")
 
             # Check if job description is already uploaded
-            if job_storage["current_jd"] is not None:
+            if len(job_storage) > 0:
                 print("🚀 Both JD and Resume available. Triggering matching process...")
                 return await _trigger_matching_process()
 
@@ -375,8 +375,10 @@ async def _trigger_matching_process():
             },
             "input_info": {
                 "job_description": {
-                    "company": jd_data.get("company_name"),
-                    "position": jd_data.get("position_title"),
+                    "company": jd_data.get("structured_data", {}).get("company")
+                    or "Unknown Company",
+                    "position": jd_data.get("structured_data", {}).get("job_title")
+                    or jd_data.get("filename", "Unknown Position"),
                     "source_type": jd_data.get("source_type"),
                     "text_length": len(jd_text),
                 },
@@ -593,6 +595,165 @@ async def get_job_by_id(job_id: int):
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Error retrieving job description: {str(e)}"
+        )
+
+
+@router.post("/get-score")
+async def get_matching_score(
+    resume_file: UploadFile = File(
+        ..., description="PDF file containing resume", media_type="application/pdf"
+    ),
+    job_id: str = Form(..., description="Job ID to match against"),
+):
+    """
+    Upload resume and get matching score for a specific job
+
+    Args:
+        resume_file: PDF file containing resume
+        job_id: ID of the job description to match against
+
+    Returns:
+        Matching score and basic information
+    """
+    try:
+        print(f"📄 Get-score request received for job_id: {job_id}")
+        print(f"📄 Resume filename: {resume_file.filename}")
+
+        # Validate file type
+        if not resume_file.filename or not resume_file.filename.endswith(".pdf"):
+            raise HTTPException(status_code=400, detail="Only PDF files are allowed")
+
+        if resume_file.content_type not in [
+            "application/pdf",
+            "application/octet-stream",
+        ]:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid file type. Expected PDF, got {resume_file.content_type}",
+            )
+
+        # Find job by job_id
+        job_data = None
+        for job in job_storage:
+            if job.get("id") == job_id:
+                job_data = job
+                break
+
+        if not job_data:
+            raise HTTPException(
+                status_code=404, detail=f"Job with ID {job_id} not found"
+            )
+
+        # Save file temporarily and extract text
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
+            content = await resume_file.read()
+            temp_file.write(content)
+            temp_file_path = temp_file.name
+
+        try:
+            # Extract text from resume PDF
+            extraction_service = PDFExtractionService()
+            extraction_result = extraction_service.extract_pdf_text(temp_file_path)
+
+            if not extraction_result.get("success", False):
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Failed to extract text from PDF: {extraction_result.get('error')}",
+                )
+
+            resume_text = extraction_result.get("raw_text", "")
+
+            if not resume_text.strip():
+                raise HTTPException(
+                    status_code=400, detail="No text content found in resume PDF"
+                )
+
+            print(f"✅ Resume extracted. Length: {len(resume_text)} characters")
+
+            # Get job description text
+            jd_text = job_data["text"]
+            print(f"✅ Job description found. Length: {len(jd_text)} characters")
+
+            # Stage 1: Data Cleaning with Groq
+            print("🧹 Cleaning data with Groq...")
+
+            # Clean job description
+            jd_cleaning_result = clean_job_description_text(jd_text)
+            if not jd_cleaning_result.get("success", False):
+                print("⚠️ JD cleaning failed, using raw text")
+                cleaned_jd_text = jd_text
+            else:
+                structured_jd = jd_cleaning_result.get("structured_data", {})
+                cleaned_jd_text = _create_text_from_structured_data(
+                    structured_jd, jd_text
+                )
+
+            # Clean resume
+            resume_cleaning_result = clean_resume_text(resume_text)
+            if not resume_cleaning_result.get("success", False):
+                print("⚠️ Resume cleaning failed, using raw text")
+                cleaned_resume_text = resume_text
+            else:
+                structured_resume = resume_cleaning_result.get("structured_data", {})
+                cleaned_resume_text = _create_text_from_structured_data(
+                    structured_resume, resume_text
+                )
+
+            print("✅ Data cleaning completed")
+
+            # Stage 2: Matching
+            print("🎯 Performing matching...")
+
+            matching_result = match_resume_to_job(cleaned_resume_text, cleaned_jd_text)
+
+            if not matching_result.get("success", False):
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Matching failed: {matching_result.get('error', 'Unknown error')}",
+                )
+
+            print("✅ Matching completed")
+
+            # Return simplified score response
+            score_response = {
+                "success": True,
+                "timestamp": datetime.now().isoformat(),
+                "job_id": job_id,
+                "job_info": {
+                    "company": job_data.get("structured_data", {}).get("company")
+                    or "Unknown Company",
+                    "position": job_data.get("structured_data", {}).get("job_title")
+                    or job_data.get("filename", "Unknown Position"),
+                },
+                "resume_info": {
+                    "filename": resume_file.filename,
+                    "text_length": len(resume_text),
+                },
+                "score": matching_result.get("relevance_score"),
+                "verdict": matching_result.get("verdict"),
+                "matched_skills": matching_result.get("matched_skills", []),
+                "missing_skills": matching_result.get("missing_skills", []),
+                "suggestions": matching_result.get("suggestions", []),
+            }
+
+            print(f"🎉 Score calculation completed! Score: {score_response['score']}%")
+
+            return score_response
+
+        finally:
+            # Clean up temp file
+            if os.path.exists(temp_file_path):
+                os.unlink(temp_file_path)
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error in get-score endpoint: {str(e)}")
+        import traceback
+
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500, detail=f"Error calculating score: {str(e)}"
         )
 
 

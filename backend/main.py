@@ -38,6 +38,7 @@ async def root():
         "endpoints": {
             "upload_job_description": "POST /api/job-description",
             "upload_resume": "POST /api/resume",
+            "get_matching_score": "POST /api/get-score",
             "manual_match": "POST /api/match",
             "get_all_jobs": "GET /api/get-jobs",
             "get_job_by_id": "GET /api/get-job/{job_id}",
