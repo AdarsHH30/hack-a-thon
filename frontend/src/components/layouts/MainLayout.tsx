@@ -5,35 +5,59 @@ interface MainLayoutProps {
   children: React.ReactNode;
 }
 
+const InnomaticsLogo = () => {
+  return (
+    <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+      {/* Logo Icon */}
+      <div className="relative w-8 h-8">
+        <div className="absolute inset-0 bg-gradient-to-br from-innomatics-red to-innomatics-purple rounded-lg"></div>
+        <div className="absolute inset-1 bg-background rounded-md flex items-center justify-center">
+          <div className="w-3 h-3 bg-gradient-to-br from-innomatics-blue to-innomatics-purple rounded-full"></div>
+        </div>
+      </div>
+      
+      {/* Logo Text */}
+      <div className="flex flex-col">
+        <span className="text-lg font-black text-foreground leading-none tracking-tight">
+          INNOMATICS
+        </span>
+        <span className="text-xs font-medium text-innomatics-red leading-none tracking-wider">
+          RESEARCH LABS
+        </span>
+      </div>
+    </Link>
+  );
+};
+
 export default function MainLayout({ children }: MainLayoutProps) {
   return (
     <div className="min-h-screen bg-background">
-      <nav className="bg-card shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo */}
-            <Link href="/" className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-accent rounded-sm flex items-center justify-center">
-                <div className="w-5 h-5 bg-white transform rotate-45"></div>
-              </div>
-              <div>
-                <div className="font-bold text-lg text-foreground">
-                  Innomatics
-                </div>
-                <div className="text-xs text-muted-foreground -mt-1 tracking-wider">
-                  RESEARCH LABS
-                </div>
-              </div>
-            </Link>
+      <nav className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+          {/* Logo */}
+          <InnomaticsLogo />
 
-            {/* Dashboard Button */}
-            <div className="flex items-center space-x-3">
-              <span className="text-sm font-medium text-foreground">
-                Dashboard
-              </span>
-              <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                <div className="w-6 h-6 bg-gray-400 rounded-full"></div>
-              </div>
+          {/* Navigation Items */}
+          <div className="flex items-center gap-6">
+            <Link href="/job-list" className="text-foreground hover:text-innomatics-blue transition-colors font-medium">
+              Jobs
+            </Link>
+            <Link href="/recruiter" className="text-foreground hover:text-innomatics-blue transition-colors font-medium">
+              For Employers
+            </Link>
+            
+            {/* Auth Buttons */}
+            <div className="flex items-center gap-3">
+              <Link href="/login">
+                <button className="text-foreground hover:text-innomatics-blue transition-colors font-medium">
+                  Sign In
+                </button>
+              </Link>
+              <Link href="/signup">
+                <button className="bg-innomatics-blue text-white px-4 py-2 rounded-lg font-medium hover:bg-innomatics-blue/90 transition-colors">
+                  Sign Up
+                </button>
+              </Link>
             </div>
           </div>
         </div>

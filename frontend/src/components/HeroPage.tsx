@@ -65,24 +65,24 @@ const InnomaticsHero = memo(function InnomaticsHero() {
             transition={{ duration: 0.8, delay: 0.4 }}
             className="flex flex-col sm:flex-row gap-4 justify-center max-w-lg mx-auto mb-16"
           >
-            <Link href="/recruiter">
+            <Link href="/job-list">
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className="w-full bg-foreground text-background px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 hover:shadow-lg flex items-center justify-center gap-2"
               >
-                Start evaluating
+                Find your next job
                 <ArrowRight className="w-5 h-5" />
               </motion.button>
             </Link>
 
-            <Link href="/pricing">
+            <Link href="/recruiter">
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className="w-full border border-border bg-background text-foreground px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 hover:bg-muted"
               >
-                View pricing
+                Find your next hire
               </motion.button>
             </Link>
           </motion.div>
