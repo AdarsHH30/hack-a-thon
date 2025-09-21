@@ -137,33 +137,93 @@ async def upload_job_description(
                 status_code=400, detail="No text content found in job description"
             )
 
-        # Store job description with unique ID
-        job_id = len(job_storage) + 1
-        job_data = {
-            "id": job_id,
-            "text": final_jd_text,
-            "source_type": source_type,
-            "uploaded_at": datetime.now().isoformat(),
-            "filename": jd_file.filename if jd_file else None,
-            "document_type": extraction_result.get("document_type"),
-            "structured_data": extraction_result.get("structured_data", {}),
-        }
-        job_storage.append(job_data)
+        # Stage 2: Clean data with Groq API to extract structured information
+        print("🧹 Stage 2: Cleaning job description data with Groq...")
+        from app.services.clean_data.data_cleaner import clean_job_description_text
 
-        print(
-            f"✅ Job description uploaded ({source_type}). ID: {job_id}, Length: {len(final_jd_text)} characters"
-        )
+        cleaning_result = clean_job_description_text(final_jd_text)
+
+        if not cleaning_result.get("success", False):
+            print("⚠️ Data cleaning failed, proceeding with raw text only")
+            # Create a single job entry with raw text
+            job_id = len(job_storage) + 1
+            job_data = {
+                "id": job_id,
+                "text": final_jd_text,
+                "source_type": source_type,
+                "uploaded_at": datetime.now().isoformat(),
+                "filename": jd_file.filename if jd_file else None,
+                "document_type": extraction_result.get("document_type"),
+                "structured_data": {},
+                "cleaning_status": "failed"
+            }
+            job_storage.append(job_data)
+            jobs_created = 1
+        else:
+            # Data cleaning successful - handle multiple jobs if found
+            structured_jobs = cleaning_result.get("structured_data", [])
+            multiple_jobs = cleaning_result.get("multiple_jobs", False)
+            job_count = cleaning_result.get("job_count", 1)
+
+            print(f"✅ Data cleaning completed. Found {job_count} job(s)")
+
+            jobs_created = 0
+            uploaded_job_ids = []
+
+            for i, job_structured_data in enumerate(structured_jobs):
+                job_id = len(job_storage) + 1
+
+                # For multiple jobs, split the raw text proportionally
+                if multiple_jobs and job_count > 1:
+                    # Simple text splitting - in production, you'd want more sophisticated splitting
+                    text_chunks = final_jd_text.split('\n\n')
+                    chunk_size = len(text_chunks) // job_count
+                    start_idx = i * chunk_size
+                    end_idx = (i + 1) * chunk_size if i < job_count - 1 else len(text_chunks)
+                    job_text = '\n\n'.join(text_chunks[start_idx:end_idx])
+                else:
+                    job_text = final_jd_text
+
+                job_data = {
+                    "id": job_id,
+                    "text": job_text,
+                    "source_type": source_type,
+                    "uploaded_at": datetime.now().isoformat(),
+                    "filename": jd_file.filename if jd_file else f"{jd_file.filename}_job_{i+1}" if multiple_jobs else jd_file.filename,
+                    "document_type": extraction_result.get("document_type"),
+                    "structured_data": job_structured_data,
+                    "cleaning_status": "success",
+                    "job_index": i + 1 if multiple_jobs else 1,
+                    "total_jobs_in_document": job_count
+                }
+
+                job_storage.append(job_data)
+                uploaded_job_ids.append(job_id)
+                jobs_created += 1
+
+                print(f"✅ Job {i+1}/{job_count} uploaded. ID: {job_id}")
+
+        print(f"🎉 Job description processing completed. Created {jobs_created} job(s)")
 
         # Check if resume is already uploaded
         if resume_storage["current_resume"] is not None:
             print("🚀 Both JD and Resume available. Triggering matching process...")
             return await _trigger_matching_process()
 
+        # Return appropriate response based on number of jobs created
+        if jobs_created == 1:
+            response_message = "Job description uploaded and processed successfully"
+        else:
+            response_message = f"Job descriptions uploaded and processed successfully. Created {jobs_created} job positions"
+
         return {
             "success": True,
-            "message": "Job description uploaded successfully",
+            "message": response_message,
             "source_type": source_type,
             "text_length": len(final_jd_text),
+            "jobs_created": jobs_created,
+            "uploaded_job_ids": uploaded_job_ids if 'uploaded_job_ids' in locals() else [len(job_storage)],
+            "cleaning_status": "success" if cleaning_result.get("success", False) else "failed",
             "next_step": "Upload resume to start matching process",
             "timestamp": datetime.now().isoformat(),
         }
@@ -314,7 +374,7 @@ async def _trigger_matching_process():
 
         if not jd_data:
             raise HTTPException(status_code=400, detail="No job descriptions available")
-
+        
         jd_text = jd_data["text"]
         resume_text = resume_data["text"]
 
