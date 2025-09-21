@@ -385,198 +385,206 @@ export default function ResumeUpload({
 
       {/* Matching Results */}
       <AnimatePresence>
-        {matchResults && matchResults.success && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="space-y-6"
-          >
-            {/* Score Overview */}
-            <div className="bg-card border border-border rounded-xl p-6">
-              <div className="text-center mb-6">
-                <div
-                  className={`inline-flex items-center justify-center w-24 h-24 rounded-full ${getScoreBgColor(
-                    matchResults.matching_results.score
-                  )} mb-4`}
-                >
-                  <span
-                    className={`text-3xl font-bold ${getScoreColor(
-                      matchResults.matching_results.score
-                    )}`}
-                  >
-                    {matchResults.matching_results.score.toFixed(1)}%
-                  </span>
-                </div>
-                <h3 className="text-2xl font-bold text-foreground mb-2">
-                  {matchResults.matching_results.verdict}
-                </h3>
-                <p className="text-muted-foreground">
-                  Match Score: {matchResults.matching_results.score.toFixed(1)}%
-                </p>
-              </div>
-
-              {/* Score Breakdown */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div className="text-center p-4 bg-secondary/50 rounded-lg">
-                  <div className="text-2xl font-bold text-foreground">
-                    {matchResults.matching_results.score_breakdown.hard_match_score.toFixed(
-                      1
-                    )}
-                    %
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    Hard Match
-                  </div>
-                </div>
-                <div className="text-center p-4 bg-secondary/50 rounded-lg">
-                  <div className="text-2xl font-bold text-foreground">
-                    {matchResults.matching_results.score_breakdown.semantic_score.toFixed(
-                      1
-                    )}
-                    %
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    Semantic Match
-                  </div>
-                </div>
-                <div className="text-center p-4 bg-secondary/50 rounded-lg">
-                  <div className="text-2xl font-bold text-foreground">
-                    {matchResults.matching_results.score_breakdown.final_score.toFixed(
-                      1
-                    )}
-                    %
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    Final Score
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Skills Analysis */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Matched Skills */}
+        {matchResults &&
+          matchResults.success &&
+          matchResults.matching_results && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="space-y-6"
+            >
+              {/* Score Overview */}
               <div className="bg-card border border-border rounded-xl p-6">
-                <div className="flex items-center mb-4">
-                  <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
-                  <h4 className="text-lg font-semibold text-foreground">
-                    Matched Skills
-                  </h4>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {matchResults.matching_results.matched_skills.map(
-                    (skill, index) => (
-                      <span
-                        key={index}
-                        className="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full"
-                      >
-                        {skill}
-                      </span>
-                    )
-                  )}
-                </div>
-              </div>
-
-              {/* Missing Skills */}
-              <div className="bg-card border border-border rounded-xl p-6">
-                <div className="flex items-center mb-4">
-                  <AlertCircle className="w-5 h-5 text-red-600 mr-2" />
-                  <h4 className="text-lg font-semibold text-foreground">
-                    Missing Skills
-                  </h4>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {matchResults.matching_results.missing_skills.map(
-                    (skill, index) => (
-                      <span
-                        key={index}
-                        className="px-3 py-1 bg-red-100 text-red-800 text-sm font-medium rounded-full"
-                      >
-                        {skill}
-                      </span>
-                    )
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Suggestions */}
-            <div className="bg-card border border-border rounded-xl p-6">
-              <div className="flex items-center mb-4">
-                <Target className="w-5 h-5 text-blue-600 mr-2" />
-                <h4 className="text-lg font-semibold text-foreground">
-                  Suggestions
-                </h4>
-              </div>
-              <ul className="space-y-2">
-                {matchResults.matching_results.suggestions.map(
-                  (suggestion, index) => (
-                    <li key={index} className="flex items-start">
-                      <span className="text-blue-600 mr-2">•</span>
-                      <span className="text-foreground">{suggestion}</span>
-                    </li>
-                  )
-                )}
-              </ul>
-            </div>
-
-            {/* Skill Categories Analysis */}
-            <div className="bg-card border border-border rounded-xl p-6">
-              <div className="flex items-center mb-4">
-                <TrendingUp className="w-5 h-5 text-purple-600 mr-2" />
-                <h4 className="text-lg font-semibold text-foreground">
-                  Skill Categories Analysis
-                </h4>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {Object.entries(
-                  matchResults.matching_results.detailed_analysis
-                    .skill_categories_analysis
-                ).map(([category, analysis]) => (
+                <div className="text-center mb-6">
                   <div
-                    key={category}
-                    className="p-4 bg-secondary/50 rounded-lg"
+                    className={`inline-flex items-center justify-center w-24 h-24 rounded-full ${getScoreBgColor(
+                      matchResults?.matching_results?.score || 0
+                    )} mb-4`}
                   >
-                    <h5 className="font-medium text-foreground mb-2 capitalize">
-                      {category.replace(/_/g, " ")}
-                    </h5>
-                    <div className="text-2xl font-bold text-foreground mb-1">
-                      {analysis.match_rate}%
+                    <span
+                      className={`text-3xl font-bold ${getScoreColor(
+                        matchResults?.matching_results?.score || 0
+                      )}`}
+                    >
+                      {(matchResults?.matching_results?.score || 0).toFixed(1)}%
+                    </span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-foreground mb-2">
+                    {matchResults?.matching_results?.verdict ||
+                      "No verdict available"}
+                  </h3>
+                  <p className="text-muted-foreground">
+                    Match Score:{" "}
+                    {(matchResults?.matching_results?.score || 0).toFixed(1)}%
+                  </p>
+                </div>
+
+                {/* Score Breakdown */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  <div className="text-center p-4 bg-secondary/50 rounded-lg">
+                    <div className="text-2xl font-bold text-foreground">
+                      {(
+                        matchResults?.matching_results?.score_breakdown
+                          ?.hard_match_score || 0
+                      ).toFixed(1)}
+                      %
                     </div>
-                    <div className="text-sm text-muted-foreground mb-2">
-                      Match Rate
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {analysis.matched_skills.length}/{analysis.total_required}{" "}
-                      skills
+                    <div className="text-sm text-muted-foreground">
+                      Hard Match
                     </div>
                   </div>
-                ))}
+                  <div className="text-center p-4 bg-secondary/50 rounded-lg">
+                    <div className="text-2xl font-bold text-foreground">
+                      {(
+                        matchResults?.matching_results?.score_breakdown
+                          ?.semantic_score || 0
+                      ).toFixed(1)}
+                      %
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Semantic Match
+                    </div>
+                  </div>
+                  <div className="text-center p-4 bg-secondary/50 rounded-lg">
+                    <div className="text-2xl font-bold text-foreground">
+                      {(
+                        matchResults?.matching_results?.score_breakdown
+                          ?.final_score || 0
+                      ).toFixed(1)}
+                      %
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Final Score
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
 
-            {/* Strengths */}
-            <div className="bg-card border border-border rounded-xl p-6">
-              <div className="flex items-center mb-4">
-                <Award className="w-5 h-5 text-green-600 mr-2" />
-                <h4 className="text-lg font-semibold text-foreground">
-                  Strengths
-                </h4>
+              {/* Skills Analysis */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Matched Skills */}
+                <div className="bg-card border border-border rounded-xl p-6">
+                  <div className="flex items-center mb-4">
+                    <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
+                    <h4 className="text-lg font-semibold text-foreground">
+                      Matched Skills
+                    </h4>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {(matchResults?.matching_results?.matched_skills || []).map(
+                      (skill, index) => (
+                        <span
+                          key={index}
+                          className="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full"
+                        >
+                          {skill}
+                        </span>
+                      )
+                    )}
+                  </div>
+                </div>
+
+                {/* Missing Skills */}
+                <div className="bg-card border border-border rounded-xl p-6">
+                  <div className="flex items-center mb-4">
+                    <AlertCircle className="w-5 h-5 text-red-600 mr-2" />
+                    <h4 className="text-lg font-semibold text-foreground">
+                      Missing Skills
+                    </h4>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {(matchResults?.matching_results?.missing_skills || []).map(
+                      (skill, index) => (
+                        <span
+                          key={index}
+                          className="px-3 py-1 bg-red-100 text-red-800 text-sm font-medium rounded-full"
+                        >
+                          {skill}
+                        </span>
+                      )
+                    )}
+                  </div>
+                </div>
               </div>
-              <ul className="space-y-2">
-                {matchResults.matching_results.detailed_analysis.strengths.map(
-                  (strength, index) => (
+
+              {/* Suggestions */}
+              <div className="bg-card border border-border rounded-xl p-6">
+                <div className="flex items-center mb-4">
+                  <Target className="w-5 h-5 text-blue-600 mr-2" />
+                  <h4 className="text-lg font-semibold text-foreground">
+                    Suggestions
+                  </h4>
+                </div>
+                <ul className="space-y-2">
+                  {(matchResults?.matching_results?.suggestions || []).map(
+                    (suggestion, index) => (
+                      <li key={index} className="flex items-start">
+                        <span className="text-blue-600 mr-2">•</span>
+                        <span className="text-foreground">{suggestion}</span>
+                      </li>
+                    )
+                  )}
+                </ul>
+              </div>
+
+              {/* Skill Categories Analysis */}
+              <div className="bg-card border border-border rounded-xl p-6">
+                <div className="flex items-center mb-4">
+                  <TrendingUp className="w-5 h-5 text-purple-600 mr-2" />
+                  <h4 className="text-lg font-semibold text-foreground">
+                    Skill Categories Analysis
+                  </h4>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {Object.entries(
+                    matchResults?.matching_results?.detailed_analysis
+                      ?.skill_categories_analysis || {}
+                  ).map(([category, analysis]) => (
+                    <div
+                      key={category}
+                      className="p-4 bg-secondary/50 rounded-lg"
+                    >
+                      <h5 className="font-medium text-foreground mb-2 capitalize">
+                        {category.replace(/_/g, " ")}
+                      </h5>
+                      <div className="text-2xl font-bold text-foreground mb-1">
+                        {analysis?.match_rate || 0}%
+                      </div>
+                      <div className="text-sm text-muted-foreground mb-2">
+                        Match Rate
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {(analysis?.matched_skills || []).length}/
+                        {analysis?.total_required || 0} skills
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Strengths */}
+              <div className="bg-card border border-border rounded-xl p-6">
+                <div className="flex items-center mb-4">
+                  <Award className="w-5 h-5 text-green-600 mr-2" />
+                  <h4 className="text-lg font-semibold text-foreground">
+                    Strengths
+                  </h4>
+                </div>
+                <ul className="space-y-2">
+                  {(
+                    matchResults?.matching_results?.detailed_analysis
+                      ?.strengths || []
+                  ).map((strength, index) => (
                     <li key={index} className="flex items-start">
                       <span className="text-green-600 mr-2">✓</span>
                       <span className="text-foreground">{strength}</span>
                     </li>
-                  )
-                )}
-              </ul>
-            </div>
-          </motion.div>
-        )}
+                  ))}
+                </ul>
+              </div>
+            </motion.div>
+          )}
       </AnimatePresence>
 
       {/* Error Message */}
