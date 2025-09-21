@@ -31,6 +31,7 @@ export default function JobList() {
   const [jobDescriptions, setJobDescriptions] = useState<JobDescription[]>([]);
   const [isLoadingJobs, setIsLoadingJobs] = useState(true);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [hasError, setHasError] = useState(false);
   const { user } = useAuth();
 
   // Check if user is admin (you can implement proper role checking later)
@@ -166,13 +167,9 @@ export default function JobList() {
     loadJobDescriptions();
   }, []);
 
-  // Logout function removed for testing
-  // const handleLogout = async () => {
-  //   await supabase.auth.signOut();
-  // };
-
   const loadJobDescriptions = async () => {
     setIsLoadingJobs(true);
+    setHasError(false);
 
     try {
       const response = await fetch(
@@ -214,17 +211,120 @@ export default function JobList() {
         setJobDescriptions(transformedJobs);
       } else {
         console.error("API response unsuccessful:", data);
-        // Fallback to mock data if API fails
-        setJobDescriptions(mockJobs);
+        // Set empty array if API returns no jobs
+        setJobDescriptions([]);
       }
     } catch (error) {
       console.error("Error fetching jobs:", error);
-      // Fallback to mock data if fetch fails
+      setHasError(true);
+      // Use mock data only if there's an error, not if there are simply no jobs
       setJobDescriptions(mockJobs);
     } finally {
       setIsLoadingJobs(false);
     }
   };
+
+  // Loading skeleton component
+  const LoadingSkeleton = () => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {[...Array(6)].map((_, index) => (
+        <Card key={index} className="animate-pulse border-2">
+          <CardHeader className="pb-4">
+            <div className="bg-muted rounded-lg h-6 w-3/4 mb-2"></div>
+            <div className="bg-muted rounded-md h-4 w-1/2"></div>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="flex items-center space-x-4 mb-4">
+              <div className="bg-muted rounded-md h-3 w-20"></div>
+              <div className="bg-muted rounded-md h-3 w-16"></div>
+              <div className="bg-muted rounded-md h-3 w-24"></div>
+            </div>
+            <div className="space-y-2 mb-4">
+              <div className="bg-muted rounded-md h-3 w-full"></div>
+              <div className="bg-muted rounded-md h-3 w-4/5"></div>
+              <div className="bg-muted rounded-md h-3 w-3/5"></div>
+            </div>
+            <div className="flex space-x-2 mb-4">
+              <div className="bg-muted rounded-full h-6 w-16"></div>
+              <div className="bg-muted rounded-full h-6 w-20"></div>
+              <div className="bg-muted rounded-full h-6 w-14"></div>
+            </div>
+            <div className="flex justify-between items-center">
+              <div className="bg-muted rounded-md h-3 w-20"></div>
+              <div className="bg-muted rounded-lg h-8 w-24"></div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+
+  // No jobs available component
+  const NoJobsAvailable = () => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="text-center py-16 px-4"
+    >
+      <div className="max-w-md mx-auto">
+        {/* Icon */}
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+          className="w-32 h-32 mx-auto mb-8 bg-gradient-to-br from-innomatics-blue/10 to-innomatics-purple/10 rounded-full flex items-center justify-center"
+        >
+          <div className="text-6xl">💼</div>
+        </motion.div>
+
+        {/* Content */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+        >
+          <h3 className="text-2xl font-bold text-foreground mb-4">
+            No Job Opportunities Yet
+          </h3>
+          <p className="text-muted-foreground mb-8 leading-relaxed">
+            We're constantly working to bring you the best career opportunities.
+            New positions are posted regularly, so check back soon or be the
+            first to post a job opening!
+          </p>
+
+          {/* Action buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={loadJobDescriptions}
+              className="px-6 py-3 bg-innomatics-blue text-background font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2"
+            >
+              <span>🔄</span>
+              Refresh Jobs
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowUploadModal(true)}
+              className="px-6 py-3 bg-innomatics-red text-background font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2"
+            >
+              <span>➕</span>
+              Post First Job
+            </motion.button>
+          </div>
+        </motion.div>
+
+        {/* Decorative elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-innomatics-blue/20 rounded-full animate-pulse"></div>
+          <div className="absolute top-3/4 right-1/4 w-3 h-3 bg-innomatics-purple/20 rounded-full animate-pulse delay-500"></div>
+          <div className="absolute bottom-1/4 left-1/3 w-1 h-1 bg-innomatics-red/30 rounded-full animate-pulse delay-1000"></div>
+        </div>
+      </div>
+    </motion.div>
+  );
 
   return (
     <div className="min-h-screen bg-background overflow-hidden">
@@ -239,67 +339,128 @@ export default function JobList() {
           <div className="flex justify-between items-center mb-4">
             <Link
               href="/"
-              className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors group"
             >
-              ← Back to home
+              <span className="mr-2 group-hover:-translate-x-1 transition-transform">
+                ←
+              </span>
+              Back to home
             </Link>
             <div className="flex items-center space-x-4">
               {user ? (
-                <>
+                <div className="flex items-center space-x-2">
+                  <div className="w-8 h-8 bg-innomatics-blue/10 rounded-full flex items-center justify-center">
+                    <span className="text-innomatics-blue font-semibold text-sm">
+                      {(user?.user_metadata?.name ||
+                        user?.email ||
+                        "U")[0].toUpperCase()}
+                    </span>
+                  </div>
                   <span className="text-sm text-muted-foreground">
-                    Welcome, {user?.user_metadata?.name || user?.email}
+                    {user?.user_metadata?.name || user?.email}
                   </span>
-                </>
+                </div>
               ) : (
                 <div className="flex space-x-2">
                   <Link href="/student-login">
-                    <Button variant="outline" size="sm">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="hover:bg-innomatics-blue/10"
+                    >
                       Student Login
                     </Button>
                   </Link>
                   <Link href="/admin-login">
-                    <Button variant="outline" size="sm">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="hover:bg-innomatics-purple/10"
+                    >
                       Admin Login
                     </Button>
                   </Link>
                 </div>
               )}
-              <Link href="/recruiter">
-                <Button className="bg-innomatics-blue hover:bg-innomatics-blue/90 text-background font-semibold px-6 py-2">
-                  Post Job
-                </Button>
-              </Link>
             </div>
           </div>
-          <h1 className="text-4xl font-bold text-foreground mb-4">
-            💼 Available Job Opportunities
+          <h1 className="text-4xl font-bold text-foreground mb-4 flex items-center justify-center gap-3">
+            <span className="text-3xl">💼</span>
+            Available Job Opportunities
           </h1>
-          <p className="text-lg text-muted-foreground">
-            Discover amazing career opportunities from top companies
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Discover amazing career opportunities from top companies and take
+            the next step in your professional journey
           </p>
         </motion.div>
 
-        {/* Admin Upload Button */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="flex justify-end mb-6"
-        >
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setShowUploadModal(true)}
-            className="px-6 py-3 bg-gradient-to-r from-innomatics-red to-innomatics-purple text-background font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+        {/* Stats Bar */}
+        {!isLoadingJobs && jobDescriptions.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="bg-card border rounded-xl p-4 mb-6 flex items-center justify-between"
           >
-            <div className="flex items-center justify-center gap-2">
-              <span className="text-xl">📤</span>
-              <span>Upload Job</span>
+            <div className="flex items-center space-x-6">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-innomatics-blue">
+                  {jobDescriptions.length}
+                </div>
+                <div className="text-sm text-muted-foreground">Active Jobs</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-innomatics-purple">
+                  {new Set(jobDescriptions.map((job) => job.company)).size}
+                </div>
+                <div className="text-sm text-muted-foreground">Companies</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-innomatics-red">
+                  {new Set(jobDescriptions.map((job) => job.location)).size}
+                </div>
+                <div className="text-sm text-muted-foreground">Locations</div>
+              </div>
             </div>
-          </motion.button>
-        </motion.div>
 
-        {/* Job Listings Grid */}
+            {/* Post Job Button */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowUploadModal(true)}
+              className="px-6 py-3 bg-gradient-to-r from-innomatics-red to-innomatics-red/90 text-background font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              <div className="flex items-center justify-center gap-2">
+                <span>➕</span>
+                <span>Post Job</span>
+              </div>
+            </motion.button>
+          </motion.div>
+        )}
+
+        {/* Post Job Button (when no jobs) */}
+        {!isLoadingJobs && jobDescriptions.length === 0 && !hasError && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="flex justify-center mb-6"
+          >
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowUploadModal(true)}
+              className="px-8 py-4 bg-gradient-to-r from-innomatics-red to-innomatics-red/90 text-background font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              <div className="flex items-center justify-center gap-2">
+                <span>➕</span>
+                <span>Post Your First Job</span>
+              </div>
+            </motion.button>
+          </motion.div>
+        )}
+
+        {/* Content Area */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -307,23 +468,9 @@ export default function JobList() {
           className="mb-8"
         >
           {isLoadingJobs ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, index) => (
-                <Card key={index} className="animate-pulse">
-                  <CardHeader>
-                    <div className="bg-gray-200 h-6 w-3/4 rounded mb-2"></div>
-                    <div className="bg-gray-200 h-4 w-1/2 rounded"></div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="bg-gray-200 h-20 w-full rounded mb-4"></div>
-                    <div className="flex space-x-2">
-                      <div className="bg-gray-200 h-6 w-16 rounded"></div>
-                      <div className="bg-gray-200 h-6 w-20 rounded"></div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <LoadingSkeleton />
+          ) : jobDescriptions.length === 0 ? (
+            <NoJobsAvailable />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {jobDescriptions.map((job, index) => (
@@ -333,53 +480,65 @@ export default function JobList() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
                 >
-                  <Card className="h-full hover:shadow-lg transition-all duration-300 hover:border-innomatics-blue/50">
-                    <CardHeader>
-                      <CardTitle className="text-xl font-bold text-foreground line-clamp-2">
+                  <Card className="h-full hover:shadow-lg transition-all duration-300 hover:border-innomatics-blue/50 hover:-translate-y-1 group">
+                    <CardHeader className="pb-4">
+                      <CardTitle className="text-xl font-bold text-foreground line-clamp-2 group-hover:text-innomatics-blue transition-colors">
                         {job.title}
                       </CardTitle>
                       <CardDescription className="text-lg font-semibold text-innomatics-blue">
                         {job.company}
                       </CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="pt-0">
                       <div className="flex items-center space-x-4 mb-4 text-sm text-muted-foreground">
-                        <span>📍 {job.location}</span>
-                        <span>💼 {job.type}</span>
-                        {job.salary && <span>💰 {job.salary}</span>}
+                        <span className="flex items-center gap-1">
+                          <span>📍</span>
+                          {job.location}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <span>💼</span>
+                          {job.type}
+                        </span>
+                        {job.salary && (
+                          <span className="flex items-center gap-1">
+                            <span>💰</span>
+                            {job.salary}
+                          </span>
+                        )}
                       </div>
 
                       <p className="text-foreground mb-4 leading-relaxed line-clamp-3">
                         {job.description}
                       </p>
 
-                      <div className="flex flex-wrap gap-2 mb-4">
+                      <div className="flex flex-wrap gap-2 mb-6">
                         {job.requirements.slice(0, 3).map((req, reqIndex) => (
                           <span
                             key={reqIndex}
-                            className="px-2 py-1 bg-innomatics-blue/10 text-innomatics-blue text-xs font-medium rounded-full"
+                            className="px-3 py-1 bg-innomatics-blue/10 text-innomatics-blue text-xs font-medium rounded-full hover:bg-innomatics-blue/20 transition-colors"
                           >
                             {req}
                           </span>
                         ))}
                         {job.requirements.length > 3 && (
-                          <span className="px-2 py-1 bg-muted text-muted-foreground text-xs font-medium rounded-full">
+                          <span className="px-3 py-1 bg-muted text-muted-foreground text-xs font-medium rounded-full">
                             +{job.requirements.length - 3} more
                           </span>
                         )}
                       </div>
 
                       <div className="flex justify-between items-center">
-                        <span className="text-xs text-muted-foreground">
-                          📅 {job.postedDate}
+                        <span className="text-xs text-muted-foreground flex items-center gap-1">
+                          <span>📅</span>
+                          {job.postedDate}
                         </span>
                         <Link href={`/job-description?id=${job.id}`}>
                           <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            className="px-4 py-2 bg-innomatics-blue text-background font-semibold rounded-lg hover:bg-innomatics-blue/90 transition-colors text-sm"
+                            className="px-6 py-2 bg-gradient-to-r from-innomatics-blue to-innomatics-blue/90 text-background font-semibold rounded-lg hover:shadow-lg transition-all duration-300 text-sm"
                           >
-                            View Details
+                            View Details →
                           </motion.button>
                         </Link>
                       </div>
@@ -398,19 +557,27 @@ export default function JobList() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
               onClick={() => setShowUploadModal(false)}
             >
               <motion.div
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
-                className="bg-card rounded-2xl shadow-2xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+                className="bg-card border rounded-2xl shadow-2xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
                 onClick={(e) => e.stopPropagation()}
               >
-                <h2 className="text-2xl font-bold text-foreground mb-6">
-                  Upload New Job Description
-                </h2>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-foreground">
+                    Upload New Job Description
+                  </h2>
+                  <button
+                    onClick={() => setShowUploadModal(false)}
+                    className="w-8 h-8 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    ✕
+                  </button>
+                </div>
 
                 <JDupload
                   onUploadSuccess={(data) => {
@@ -434,7 +601,7 @@ export default function JobList() {
                     onClick={() => setShowUploadModal(false)}
                     className="px-6 py-2 bg-muted text-foreground font-semibold rounded-lg hover:bg-muted/80 transition-colors"
                   >
-                    Close
+                    Cancel
                   </button>
                 </div>
               </motion.div>

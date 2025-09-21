@@ -291,12 +291,6 @@ export default function JobDescription() {
                       user?.email ||
                       "U")[0].toUpperCase()}
                   </div>
-                  <span
-                    className="text-sm font-medium"
-                    style={{ color: "hsl(var(--gray-700))" }}
-                  >
-                    Welcome, {user?.user_metadata?.name || user?.email}
-                  </span>
                 </div>
               ) : (
                 <div className="flex space-x-3">
@@ -1123,74 +1117,13 @@ export default function JobDescription() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <Card
-            className="shadow-xl border-2 border-dashed"
-            style={{
-              background:
-                "linear-gradient(to right, hsl(var(--green-50)), hsl(var(--blue-50)))",
-              borderColor: "hsl(var(--green-200))",
+          <ResumeUpload
+            jobId={jobId || undefined}
+            onMatchComplete={(results) => {
+              console.log("Match analysis completed:", results);
+              // Handle match results if needed
             }}
-          >
-            <CardHeader className="text-center pb-4">
-              <CardTitle
-                className="text-2xl font-bold mb-2"
-                style={{ color: "hsl(var(--gray-900))" }}
-              >
-                🚀 Ready to Apply?
-              </CardTitle>
-              <CardDescription
-                className="text-lg"
-                style={{ color: "hsl(var(--gray-700))" }}
-              >
-                Upload your resume to get an instant AI-powered match analysis
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="bg-white rounded-lg p-6 shadow-inner">
-                <ResumeUpload
-                  jobId={jobId || undefined}
-                  onMatchComplete={(results) => {
-                    console.log("Match analysis completed:", results);
-                    // Handle match results if needed
-                  }}
-                />
-              </div>
-              <div className="mt-6 text-center">
-                <div
-                  className="flex justify-center space-x-6 text-sm"
-                  style={{ color: "hsl(var(--gray-600))" }}
-                >
-                  <div className="flex items-center">
-                    <span
-                      className="mr-2"
-                      style={{ color: "hsl(var(--green-500))" }}
-                    >
-                      ✓
-                    </span>
-                    Instant AI Analysis
-                  </div>
-                  <div className="flex items-center">
-                    <span
-                      className="mr-2"
-                      style={{ color: "hsl(var(--blue-500))" }}
-                    >
-                      ✓
-                    </span>
-                    Skill Matching
-                  </div>
-                  <div className="flex items-center">
-                    <span
-                      className="mr-2"
-                      style={{ color: "hsl(var(--purple-500))" }}
-                    >
-                      ✓
-                    </span>
-                    Career Insights
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          />
         </motion.div>
       </div>
     </div>
