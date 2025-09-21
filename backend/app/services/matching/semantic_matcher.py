@@ -1,6 +1,6 @@
 """
 Semantic Matching Module for Resume-Job Matching
-Implements Sentence-BERT embeddings and cosine similarity for semantic matching
+Implements TF-IDF based semantic matching with cosine similarity
 """
 
 import numpy as np
@@ -10,13 +10,6 @@ import os
 from pathlib import Path
 
 try:
-    from sentence_transformers import SentenceTransformer
-
-    SENTENCE_TRANSFORMERS_AVAILABLE = True
-except ImportError:
-    SENTENCE_TRANSFORMERS_AVAILABLE = False
-
-try:
     from sklearn.metrics.pairwise import cosine_similarity
     from sklearn.feature_extraction.text import TfidfVectorizer
 
@@ -24,9 +17,27 @@ try:
 except ImportError:
     SKLEARN_AVAILABLE = False
 
-# Global model cache for efficiency
-_MODEL_CACHE = {}
+# Global TF-IDF cache for efficiency
 _TFIDF_CACHE = {}
+
+
+class SemanticMatcher:
+    """
+    Semantic matching engine using TF-IDF vectorization and cosine similarity
+    """
+
+    def __init__(self, cache_dir: Optional[str] = None):
+        """
+        Initialize semantic matcher with TF-IDF approach
+
+        Args:
+            cache_dir: Directory to store cached embeddings (optional)
+        """
+        self.cache_dir = cache_dir or os.path.join(os.getcwd(), "cache", "embeddings")
+        self.tfidf_vectorizer = None
+
+        # Create cache directory if it doesn't exist
+        os.makedirs(self.cache_dir, exist_ok=True)
 
 
 class SemanticMatcher:
@@ -53,29 +64,9 @@ class SemanticMatcher:
         self.tfidf_vectorizer = None
 
     def _initialize_model(self):
-        """Lazy initialization of the appropriate model based on available libraries"""
-        if SENTENCE_TRANSFORMERS_AVAILABLE:
-            cache_key = f"sentence_transformer_{self.model_name}"
-            if cache_key not in _MODEL_CACHE:
-                try:
-                    print(f"Loading Sentence-BERT model: {self.model_name}")
-                    _MODEL_CACHE[cache_key] = SentenceTransformer(
-                        self.model_name, cache_folder=self.cache_dir
-                    )
-                    print("✅ Sentence-BERT model loaded and cached successfully")
-                except Exception as e:
-                    print(f"❌ Failed to load Sentence-BERT model: {e}")
-                    print("Falling back to TF-IDF vectorization")
-                    self._initialize_tfidf()
-                    return
-            self.model = _MODEL_CACHE[cache_key]
-            print(f"✅ Using cached Sentence-BERT model: {self.model_name}")
-        else:
-            print("⚠️ sentence-transformers not available, using TF-IDF fallback")
-            self._initialize_tfidf()
+        """Lazy initialization of the TF-IDF model for semantic matching"""
+        print("Initializing TF-IDF based semantic matching (lightweight AI)")
 
-    def _initialize_tfidf(self):
-        """Initialize TF-IDF vectorizer as fallback"""
         if SKLEARN_AVAILABLE:
             cache_key = "tfidf_vectorizer"
             if cache_key not in _TFIDF_CACHE:
@@ -86,11 +77,19 @@ class SemanticMatcher:
                     lowercase=True,
                     strip_accents="unicode",
                 )
-                print("✅ TF-IDF vectorizer initialized and cached")
+                print(
+                    "✅ TF-IDF vectorizer initialized and cached for semantic matching"
+                )
             self.tfidf_vectorizer = _TFIDF_CACHE[cache_key]
         else:
-            print("❌ Neither sentence-transformers nor scikit-learn available")
-            print("Semantic matching will use basic text overlap")
+            print(
+                "❌ scikit-learn not available - semantic matching will use basic text overlap"
+            )
+            print("Install scikit-learn for AI-powered semantic matching")
+
+    def _initialize_tfidf(self):
+        """Initialize TF-IDF vectorizer as fallback - DEPRECATED: Now handled in _initialize_model"""
+        self._initialize_model()
 
     def encode_text(self, text: str, use_cache: bool = True) -> np.ndarray:
         """
@@ -111,25 +110,12 @@ class SemanticMatcher:
                 return cached[0]
 
         # Lazy load model if not initialized
-        if self.model is None and self.tfidf_vectorizer is None:
+        if self.tfidf_vectorizer is None:
             self._initialize_model()
 
-        if self.model is not None:
-            # Use Sentence-BERT
-            try:
-                embedding = self.model.encode(text, convert_to_numpy=True)
-                # Cache the result
-                if use_cache:
-                    self.cache_embeddings([text], cache_key)
-                return embedding
-            except Exception as e:
-                print(f"Error encoding with Sentence-BERT: {e}")
-                return self._encode_with_tfidf([text])[0]
-
-        elif self.tfidf_vectorizer is not None:
-            # Use TF-IDF
+        if self.tfidf_vectorizer is not None:
+            # Use TF-IDF for semantic matching
             return self._encode_with_tfidf([text])[0]
-
         else:
             # Basic fallback - return word count vector
             return self._basic_encode(text)
@@ -153,23 +139,10 @@ class SemanticMatcher:
                 return cached
 
         # Lazy load model if not initialized
-        if self.model is None and self.tfidf_vectorizer is None:
+        if self.tfidf_vectorizer is None:
             self._initialize_model()
 
-        if self.model is not None:
-            try:
-                embeddings = self.model.encode(texts, convert_to_numpy=True)
-                # Cache individual texts if requested
-                if use_cache:
-                    for i, text in enumerate(texts):
-                        cache_key = f"text_{hash(text)}"
-                        self.cache_embeddings([text], cache_key)
-                return embeddings
-            except Exception as e:
-                print(f"Error encoding with Sentence-BERT: {e}")
-                return self._encode_with_tfidf(texts)
-
-        elif self.tfidf_vectorizer is not None:
+        if self.tfidf_vectorizer is not None:
             return self._encode_with_tfidf(texts)
 
         else:
@@ -222,9 +195,7 @@ class SemanticMatcher:
             embeddings = self.encode_texts([text1, text2])
 
             if SKLEARN_AVAILABLE:
-                similarity = cosine_similarity([embeddings[0]], [embeddings[1]])[0][
-                    0
-                ]
+                similarity = cosine_similarity([embeddings[0]], [embeddings[1]])[0][0]
             else:
                 # Manual cosine similarity calculation
                 similarity = self._manual_cosine_similarity(
@@ -422,7 +393,7 @@ class SemanticMatcher:
         cache_file = Path(self.cache_dir) / f"{cache_key}_embeddings.pkl"
 
         try:
-        
+
             embeddings = self.encode_texts(texts, use_cache=False)
             with open(cache_file, "wb") as f:
                 pickle.dump(embeddings, f)
