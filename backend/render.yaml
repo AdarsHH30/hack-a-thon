@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: innomatics-resume-api
+    env: docker
+    plan: free
+    region: oregon
+    branch: main
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    envVars:
+      - key: PORT
+        generateValue: true
+      - key: PYTHONPATH
+        value: /app
+      - key: GROQ_API_KEY
+        sync: false  # Set this manually in Render dashboard
+    healthCheckPath: /health
+    autoDeploy: true
+    buildCommand: ""
+    startCommand: ""
