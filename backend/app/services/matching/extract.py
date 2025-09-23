@@ -20,6 +20,7 @@ class ResumeJobExtractor:
 
     def __init__(self):
         self.api_key = os.getenv("GROQ_API_KEY")
+        print(self.api_key)
         self.base_url = "https://api.groq.com/openai/v1/chat/completions"
         self.model = "llama-3.1-8b-instant"
 

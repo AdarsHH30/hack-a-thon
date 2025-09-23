@@ -1,15 +1,17 @@
-# Virtual environment
-venv/
-.venv/
-__pycache__/
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
 *.pyc
 *.pyo
 *.pyd
 .Python
-env/
+env
 pip-log.txt
 pip-delete-this-directory.txt
-.tox/
+.tox
 .coverage
 .coverage.*
 .cache
@@ -22,7 +24,23 @@ coverage.xml
 .pytest_cache
 .hypothesis
 
-# OS generated files
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
 .DS_Store
 .DS_Store?
 ._*
@@ -31,29 +49,26 @@ coverage.xml
 ehthumbs.db
 Thumbs.db
 
-# IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
+# Project specific
+*.pdf
+*.json
+temp/
+tmp/
+logs/
+.pytest_cache/
+test_results/
 
 # Documentation
 *.md
-README*
 docs/
 
-# Test files
-tests/
-test_*
-*_test.py
+# Development files
+docker-compose.yml
+docker-compose.*.yml
+Dockerfile.dev
+.dockerignore
 
-# Large files that aren't needed
-*.pdf
-*.zip
-*.tar.gz
-*.rar
-
-# Cache directories
-cache/
-.cache/
+# Test and deployment files
+test_deployment.py
+health_check.py
+RENDER_DEPLOYMENT.md

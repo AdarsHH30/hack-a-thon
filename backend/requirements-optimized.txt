@@ -1,6 +1,6 @@
 # Core FastAPI dependencies
 fastapi==0.117.1
-uvicorn[standard]==0.30.6
+uvicorn==0.30.6
 python-multipart==0.0.20
 python-dotenv==1.1.1
 pydantic==2.11.9
@@ -21,4 +21,4 @@ scikit-learn==1.7.2
 Jinja2==3.1.6
 
 # HTTP requests
-Requests==2.32.5
+requests==2.32.5
