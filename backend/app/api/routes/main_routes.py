@@ -1011,3 +1011,18 @@ async def reset_uploads():
         "message": "All uploads cleared successfully",
         "timestamp": datetime.now().isoformat(),
     }
+
+
+@router.get("/ping")
+async def ping():
+    """
+    Keep-alive endpoint to prevent Render from sleeping
+
+    Returns:
+        Simple pong response with timestamp
+    """
+    return {
+        "status": "alive",
+        "message": "pong",
+        "timestamp": datetime.now().isoformat(),
+    }
