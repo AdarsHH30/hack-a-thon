@@ -15,8 +15,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Career Portal - Find Your Dream Job",
-  description: "Discover amazing job opportunities and connect with top employers. Upload your resume to get started with AI-powered career matching.",
+  title: "TalentMatch AI - AI-Powered Resume Matching",
+  description:
+    "Leverage cutting-edge AI to analyze resumes, identify skill gaps, and get actionable recommendations in seconds. Transform your hiring and career development process.",
+  icons: {
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+  },
 };
 
 export default function RootLayout({
@@ -30,9 +34,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
-          <PageTransition>
-            {children}
-          </PageTransition>
+          <PageTransition>{children}</PageTransition>
         </AuthProvider>
       </body>
     </html>

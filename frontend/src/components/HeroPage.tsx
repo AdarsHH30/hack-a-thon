@@ -3,35 +3,74 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { memo } from "react";
-import { ArrowRight, Building2, Zap, Target } from "lucide-react";
+import {
+  ArrowRight,
+  Sparkles,
+  Zap,
+  Target,
+  TrendingUp,
+  Shield,
+  Brain,
+} from "lucide-react";
 
-const InnomaticsHero = memo(function InnomaticsHero() {
+const TalentMatchHero = memo(function TalentMatchHero() {
   const features = [
-    "AI-powered matching",
-    "Automated screening",
-    "Instant ranking",
-    "Smart recommendations",
-    "Data-driven decisions",
-    "Placement efficiency",
+    {
+      icon: Sparkles,
+      title: "AI-Powered Analysis",
+      description:
+        "Advanced LLM technology analyzes resumes against job descriptions with precision",
+    },
+    {
+      icon: TrendingUp,
+      title: "Instant Scoring",
+      description:
+        "Get comprehensive match scores and detailed skill gap analysis in seconds",
+    },
+    {
+      icon: Shield,
+      title: "Smart Recommendations",
+      description:
+        "Receive actionable insights and improvement suggestions powered by AI",
+    },
   ];
 
-  const partnerCompanies = [
-    "Microsoft",
-    "Google",
-    "Amazon",
-    "TCS",
-    "Infosys",
-    "Wipro",
-    "Accenture",
-    "Deloitte",
+  const stats = [
+    { value: "95%", label: "Accuracy Rate" },
+    { value: "<10s", label: "Analysis Time" },
+    { value: "100+", label: "Skills Tracked" },
   ];
 
   return (
-    <div className="relative min-h-screen bg-background overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-innomatics-blue/5 via-background to-innomatics-purple/5" />
+    <div className="relative min-h-screen bg-white overflow-hidden">
+      {/* Subtle background pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
+
+      {/* Logo - Top Left */}
+      <div className="absolute top-0 left-0 z-20 px-4 sm:px-6 lg:px-8 pt-6">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex items-center gap-3"
+        >
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-red-600 to-red-700 rounded-2xl blur-xl opacity-30"></div>
+            <div className="relative bg-gradient-to-br from-red-600 to-red-700 p-3 rounded-2xl">
+              <Brain className="w-8 h-8 text-white" />
+            </div>
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">TalentMatch</h2>
+            <p className="text-sm text-red-600 font-medium">
+              AI-Powered Hiring
+            </p>
+          </div>
+        </motion.div>
+      </div>
 
       {/* Main Content */}
-      <div className="relative z-10 container mx-auto px-4 pt-20 pb-8">
+      <div className="relative z-10 container mx-auto px-4 pt-20 pb-16">
         {/* Central Hero Section */}
         <div className="text-center max-w-6xl mx-auto">
           {/* Main Headline */}
@@ -41,20 +80,23 @@ const InnomaticsHero = memo(function InnomaticsHero() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="mb-12"
           >
-            <h1 className="text-6xl md:text-7xl lg:text-8xl font-black text-foreground leading-[0.9] mb-6 tracking-tight text-balance">
-              The fastest and most powerful
-              <br />
-              <span className="text-innomatics-red">
-                platform for AI-powered
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-50 border border-red-200 rounded-full mb-8">
+              <Zap className="w-4 h-4 text-red-600" />
+              <span className="text-sm font-semibold text-red-600">
+                Powered by Advanced AI
               </span>
+            </div>
+
+            <h1 className="text-6xl md:text-7xl lg:text-8xl font-black text-gray-900 leading-[0.95] mb-8 tracking-tight">
+              Match Resumes to Jobs
               <br />
-              resume evaluation
+              <span className="text-red-600">with AI Precision</span>
             </h1>
 
-            <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed font-medium max-w-4xl mx-auto text-pretty">
-              Transform your placement process with industry-leading AI models
-              and tools. Serving teams across Hyderabad, Bangalore, Pune, and
-              Delhi NCR.
+            <p className="text-xl md:text-2xl text-gray-600 leading-relaxed font-medium max-w-4xl mx-auto">
+              Leverage cutting-edge AI to analyze resumes, identify skill gaps,
+              and get actionable recommendations in seconds. Transform your
+              hiring and career development process.
             </p>
           </motion.div>
 
@@ -63,55 +105,47 @@ const InnomaticsHero = memo(function InnomaticsHero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center max-w-lg mx-auto mb-16"
+            className="flex flex-col sm:flex-row gap-4 justify-center max-w-lg mx-auto mb-20"
           >
-            <Link href="/job-list">
+            <Link href="/analyze" className="w-full sm:w-auto">
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="w-full bg-foreground text-background px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 hover:shadow-lg flex items-center justify-center gap-2"
+                className="w-full bg-red-600 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 hover:bg-red-700 hover:shadow-lg flex items-center justify-center gap-2"
               >
-                Explore jobs
+                Try AI Analyzer
                 <ArrowRight className="w-5 h-5" />
-              </motion.button>
-            </Link>
-
-            <Link href="/recruiter">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="w-full border border-border bg-background text-foreground px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 hover:bg-muted"
-              >
-                Post a job
               </motion.button>
             </Link>
           </motion.div>
 
+          {/* Stats */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.6 }}
-            className="mb-20"
+            className="grid grid-cols-3 gap-8 max-w-2xl mx-auto mb-20"
           >
-            <p className="text-sm text-muted-foreground mb-8 font-medium tracking-wide uppercase">
-              Trusted by placement teams at
-            </p>
-            <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12 opacity-60">
-              {partnerCompanies.map((company, i) => (
-                <motion.div
-                  key={company}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.8 + i * 0.1 }}
-                  className="text-lg font-semibold text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  {company}
-                </motion.div>
-              ))}
-            </div>
+            {stats.map((stat, i) => (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 + i * 0.1 }}
+                className="text-center"
+              >
+                <div className="text-4xl font-bold text-red-600 mb-2">
+                  {stat.value}
+                </div>
+                <div className="text-sm text-gray-600 font-medium">
+                  {stat.label}
+                </div>
+              </motion.div>
+            ))}
           </motion.div>
         </div>
 
+        {/* Features Section */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -119,123 +153,68 @@ const InnomaticsHero = memo(function InnomaticsHero() {
           className="max-w-6xl mx-auto"
         >
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-              Flagship Features
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              How It Works
             </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Powerful AI models for resume evaluation with industry-leading
-              accuracy and speed.
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Three simple steps to get comprehensive AI-powered resume analysis
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {/* AI Evaluation */}
-            <motion.div
-              whileHover={{ y: -4 }}
-              className="bg-card border border-border rounded-2xl p-8 hover:shadow-lg transition-all duration-300"
-            >
-              <div className="w-12 h-12 bg-innomatics-red/10 rounded-xl flex items-center justify-center mb-6">
-                <Zap className="w-6 h-6 text-innomatics-red" />
-              </div>
-              <h3 className="text-2xl font-bold text-foreground mb-4">
-                AI-Powered Evaluation
-              </h3>
-              <p className="text-muted-foreground leading-relaxed mb-6">
-                Advanced AI models that analyze resumes with precision,
-                extracting key skills, experience, and qualifications
-                automatically.
-              </p>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                Resume parsing and analysis
-              </div>
-            </motion.div>
-
-            {/* Smart Matching */}
-            <motion.div
-              whileHover={{ y: -4 }}
-              className="bg-card border border-border rounded-2xl p-8 hover:shadow-lg transition-all duration-300"
-            >
-              <div className="w-12 h-12 bg-innomatics-purple/10 rounded-xl flex items-center justify-center mb-6">
-                <Target className="w-6 h-6 text-innomatics-purple" />
-              </div>
-              <h3 className="text-2xl font-bold text-foreground mb-4">
-                Smart Job Matching
-              </h3>
-              <p className="text-muted-foreground leading-relaxed mb-6">
-                Intelligent matching algorithm that connects the right
-                candidates with the right opportunities based on comprehensive
-                analysis.
-              </p>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                Candidate-job compatibility scoring
-              </div>
-            </motion.div>
-
-            {/* Multi-City Support */}
-            <motion.div
-              whileHover={{ y: -4 }}
-              className="bg-card border border-border rounded-2xl p-8 hover:shadow-lg transition-all duration-300"
-            >
-              <div className="w-12 h-12 bg-innomatics-blue/10 rounded-xl flex items-center justify-center mb-6">
-                <Building2 className="w-6 h-6 text-innomatics-blue" />
-              </div>
-              <h3 className="text-2xl font-bold text-foreground mb-4">
-                Multi-City Operations
-              </h3>
-              <p className="text-muted-foreground leading-relaxed mb-6">
-                Seamlessly manage placement operations across Hyderabad,
-                Bangalore, Pune, and Delhi NCR from a unified platform.
-              </p>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                Centralized team management
-              </div>
-            </motion.div>
+            {features.map((feature, i) => (
+              <motion.div
+                key={feature.title}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.9 + i * 0.1 }}
+                whileHover={{ y: -4 }}
+                className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-red-600 hover:shadow-lg transition-all duration-300"
+              >
+                <div className="w-12 h-12 bg-red-600 rounded-xl flex items-center justify-center mb-6">
+                  <feature.icon className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                  {feature.title}
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  {feature.description}
+                </p>
+              </motion.div>
+            ))}
           </div>
         </motion.div>
 
-        <div className="relative mt-20 mb-20">
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {features.map((feature, i) => {
-              const delay = i * 0.2;
-              const duration = 6 + (i % 3) * 2;
-              const x = 10 + ((i * 25) % 80);
-              const y = 20 + ((i * 30) % 60);
-
-              return (
-                <motion.div
-                  key={feature}
-                  className="absolute backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap shadow-lg border bg-card/80 text-card-foreground border-border/50"
-                  style={{
-                    left: `${x}%`,
-                    top: `${y}%`,
-                  }}
-                  animate={{
-                    y: [-5, -15, -5],
-                    opacity: [0.6, 1, 0.6],
-                  }}
-                  transition={{
-                    duration,
-                    repeat: Number.POSITIVE_INFINITY,
-                    delay,
-                    ease: "easeInOut",
-                  }}
-                  whileHover={{
-                    scale: 1.1,
-                    opacity: 1,
-                  }}
-                >
-                  {feature}
-                </motion.div>
-              );
-            })}
+        {/* CTA Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 1.2 }}
+          className="max-w-4xl mx-auto mt-24 text-center"
+        >
+          <div className="bg-gradient-to-br from-red-600 to-red-700 rounded-3xl p-12 text-white">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+              Ready to Transform Your Hiring?
+            </h2>
+            <p className="text-xl mb-8 opacity-90">
+              Join thousands of recruiters and candidates using AI-powered
+              analysis
+            </p>
+            <Link href="/analyze">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="bg-white text-red-600 px-10 py-4 rounded-xl font-bold text-lg hover:shadow-xl transition-all duration-300 inline-flex items-center gap-2"
+              >
+                Get Started Free
+                <ArrowRight className="w-5 h-5" />
+              </motion.button>
+            </Link>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
 });
 
-export default InnomaticsHero;
+export default TalentMatchHero;

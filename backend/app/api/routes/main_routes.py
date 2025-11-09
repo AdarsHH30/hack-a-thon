@@ -40,7 +40,7 @@ router = APIRouter()
 
 # Simple in-memory storage (replace with database in production)
 job_storage = []  # Changed to list to store multiple job descriptions
-resume_storage = {"current_resume": None}
+resume_storage: Dict[str, Any] = {"current_resume": None}
 
 
 class JobDescriptionRequest(BaseModel):
@@ -73,6 +73,10 @@ async def upload_job_description(
             print(f"📄 jd_file filename: {jd_file.filename}")
             print(f"📄 jd_file content_type: {jd_file.content_type}")
 
+        # Clear previous job descriptions for fresh analysis
+        job_storage.clear()
+        print("🗑️ Cleared previous job descriptions")
+
         final_jd_text = ""
 
         # Handle PDF input
@@ -89,9 +93,20 @@ async def upload_job_description(
                     detail=f"Invalid file type. Expected PDF, got {jd_file.content_type}",
                 )
 
+            # Read file content and check size
+            content = await jd_file.read()
+            file_size_mb = len(content) / (1024 * 1024)  # Convert bytes to MB
+
+            if len(content) > 1 * 1024 * 1024:  # 1MB limit
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"File size too large ({file_size_mb:.2f}MB). Maximum allowed size is 1MB. Please compress your PDF or reduce its size.",
+                )
+
+            print(f"✅ File size: {file_size_mb:.2f}MB")
+
             # Save file temporarily and extract text
             with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
-                content = await jd_file.read()
                 temp_file.write(content)
                 temp_file_path = temp_file.name
                 print(
@@ -159,6 +174,7 @@ async def upload_job_description(
             }
             job_storage.append(job_data)
             jobs_created = 1
+            uploaded_job_ids = [job_id]
         else:
             # Data cleaning successful - handle multiple jobs if found
             structured_jobs = cleaning_result.get("structured_data", [])
@@ -230,13 +246,10 @@ async def upload_job_description(
             "success": True,
             "message": response_message,
             "source_type": source_type,
+            "text": final_jd_text,  # Include the extracted text
             "text_length": len(final_jd_text),
             "jobs_created": jobs_created,
-            "uploaded_job_ids": (
-                uploaded_job_ids
-                if "uploaded_job_ids" in locals()
-                else [len(job_storage)]
-            ),
+            "uploaded_job_ids": uploaded_job_ids,
             "cleaning_status": (
                 "success" if cleaning_result.get("success", False) else "failed"
             ),
@@ -274,6 +287,10 @@ async def upload_resume(
         print(f"📄 Resume filename: {resume_file.filename}")
         print(f"📄 Resume content_type: {resume_file.content_type}")
 
+        # Clear previous resume for fresh analysis
+        resume_storage["current_resume"] = None
+        print("🗑️ Cleared previous resume")
+
         # Validate file type
         if not resume_file.filename or not resume_file.filename.endswith(".pdf"):
             raise HTTPException(status_code=400, detail="Only PDF files are allowed")
@@ -287,9 +304,20 @@ async def upload_resume(
                 detail=f"Invalid file type. Expected PDF, got {resume_file.content_type}",
             )
 
+        # Read file content and check size
+        content = await resume_file.read()
+        file_size_mb = len(content) / (1024 * 1024)  # Convert bytes to MB
+
+        if len(content) > 1 * 1024 * 1024:  # 1MB limit
+            raise HTTPException(
+                status_code=400,
+                detail=f"File size too large ({file_size_mb:.2f}MB). Maximum allowed size is 1MB. Please compress your PDF or reduce its size.",
+            )
+
+        print(f"✅ File size: {file_size_mb:.2f}MB")
+
         # Save file temporarily and extract text
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
-            content = await resume_file.read()
             temp_file.write(content)
             temp_file_path = temp_file.name
 
@@ -331,6 +359,7 @@ async def upload_resume(
                 "success": True,
                 "message": "Resume uploaded successfully",
                 "filename": resume_file.filename,
+                "text": resume_text,  # Include the extracted text
                 "text_length": len(resume_text),
                 "next_step": "Upload job description to start matching process",
                 "timestamp": datetime.now().isoformat(),
@@ -386,10 +415,13 @@ async def _trigger_matching_process():
 
         # Get stored data - use the most recent job description
         jd_data = job_storage[-1] if job_storage else None
-        resume_data = resume_storage["current_resume"]
+        resume_data = resume_storage.get("current_resume")
 
         if not jd_data:
             raise HTTPException(status_code=400, detail="No job descriptions available")
+
+        if not resume_data:
+            raise HTTPException(status_code=400, detail="Resume not uploaded yet")
 
         jd_text = jd_data["text"]
         resume_text = resume_data["text"]
