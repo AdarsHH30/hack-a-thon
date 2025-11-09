@@ -14,16 +14,13 @@ app = FastAPI(
     description="Professional API for resume-job matching with AI-powered analysis",
 )
 
-# More secure CORS configuration
+# CORS configuration - Allow all origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:3001",
-    ],  # Specific frontend URLs
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "DELETE"],  # Only needed methods
-    allow_headers=["Content-Type", "Authorization"],
+    allow_origins=["*"],  # Allow all origins
+    allow_credentials=False,  # Must be False when allow_origins is ["*"]
+    allow_methods=["*"],  # Allow all methods
+    allow_headers=["*"],  # Allow all headers
 )
 
 # Main router for all functionality
