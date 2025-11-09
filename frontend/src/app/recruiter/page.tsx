@@ -12,11 +12,9 @@ import {
   Download,
 } from "lucide-react";
 import MainLayout from "@/components/layouts/MainLayout";
+import API_BASE_URL from "@/lib/api-config";
 
 export default function RecruiterPage() {
-  // Environment variables with fallbacks for production
-  const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8003';
-  
   const [activeTab, setActiveTab] = useState("post-job");
   const [jobDescription, setJobDescription] = useState("");
   const [resumeFile, setResumeFile] = useState<File | null>(null);
@@ -89,13 +87,10 @@ export default function RecruiterPage() {
       const formData = new FormData();
       formData.append("jd_file", jobFile);
 
-      const response = await fetch(
-        `${API_BASE_URL}/api/job-description`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/api/job-description`, {
+        method: "POST",
+        body: formData,
+      });
 
       if (response.ok) {
         const result = await response.json();
@@ -125,8 +120,9 @@ export default function RecruiterPage() {
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-foreground">Post a Job</h2>
             <p className="text-muted-foreground">
-              Upload your job description and we&apos;ll take care of the rest. Just
-              drop your PDF here and candidates will start seeing it right away.
+              Upload your job description and we&apos;ll take care of the rest.
+              Just drop your PDF here and candidates will start seeing it right
+              away.
             </p>
 
             <div className="bg-card border border-border rounded-lg p-8">

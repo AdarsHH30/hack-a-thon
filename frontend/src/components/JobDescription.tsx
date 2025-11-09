@@ -10,6 +10,7 @@ import ResumeUpload from "./ResumeUpload";
 import AnalysisResults from "./AnalysisResults";
 import JobHeader from "./JobHeader";
 import JobDetails from "./JobDetails";
+import API_BASE_URL from "@/lib/api-config";
 
 interface JobDescription {
   id: string;
@@ -60,9 +61,6 @@ interface AnalysisResult {
 }
 
 export default function JobDescription() {
-  // Environment variables with fallbacks for production
-  const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8003';
-  
   const [jobDescriptions, setJobDescriptions] = useState<JobDescription[]>([]);
   const [isLoadingJobs, setIsLoadingJobs] = useState(true);
   const [selectedJob, setSelectedJob] = useState<JobDescription | null>(null);
@@ -72,7 +70,9 @@ export default function JobDescription() {
   const jobId = searchParams.get("id");
 
   // Analysis results state
-  const [analysisResults, setAnalysisResults] = useState<AnalysisResult | null>(null);
+  const [analysisResults, setAnalysisResults] = useState<AnalysisResult | null>(
+    null
+  );
 
   // Load job descriptions on component mount
   useEffect(() => {
@@ -96,9 +96,7 @@ export default function JobDescription() {
     setIsLoadingJobs(true);
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/get-jobs`
-      );
+      const response = await fetch(`${API_BASE_URL}/api/get-jobs`);
 
       if (!response.ok) {
         throw new Error(`Failed to fetch jobs: ${response.statusText}`);
@@ -327,7 +325,9 @@ export default function JobDescription() {
           </div>
 
           {/* Job Header */}
-          {selectedJob && <JobHeader selectedJob={selectedJob} user={user || undefined} />}
+          {selectedJob && (
+            <JobHeader selectedJob={selectedJob} user={user || undefined} />
+          )}
 
           {/* Job Details */}
           {selectedJob && <JobDetails selectedJob={selectedJob} />}

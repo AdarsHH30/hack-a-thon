@@ -13,6 +13,7 @@ import {
   Award,
   BookOpen,
 } from "lucide-react";
+import API_BASE_URL from "@/lib/api-config";
 
 interface MatchResult {
   success: boolean;
@@ -66,9 +67,6 @@ export default function ResumeUpload({
   jobId,
   onMatchComplete,
 }: ResumeUploadProps) {
-  // Environment variables with fallbacks for production
-  const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8003';
-  
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -153,13 +151,10 @@ export default function ResumeUpload({
         });
       }, 200);
 
-      const uploadResponse = await fetch(
-        `${API_BASE_URL}/api/resume`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      const uploadResponse = await fetch(`${API_BASE_URL}/api/resume`, {
+        method: "POST",
+        body: formData,
+      });
 
       clearInterval(progressInterval);
       setUploadProgress(50);
@@ -176,18 +171,15 @@ export default function ResumeUpload({
         setIsMatching(true);
         setUploadProgress(75);
 
-        const matchResponse = await fetch(
-          `${API_BASE_URL}/api/match`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              job_id: parseInt(jobId),
-            }),
-          }
-        );
+        const matchResponse = await fetch(`${API_BASE_URL}/api/match`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            job_id: parseInt(jobId),
+          }),
+        });
 
         setUploadProgress(90);
 

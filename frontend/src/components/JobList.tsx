@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import JDupload from "./JDupload";
+import API_BASE_URL from "@/lib/api-config";
 
 interface JobDescription {
   id: string;
@@ -27,9 +28,6 @@ interface JobDescription {
 }
 
 export default function JobList() {
-  // Environment variables with fallbacks for production
-  const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8003';
-  
   const [jobDescriptions, setJobDescriptions] = useState<JobDescription[]>([]);
   const [isLoadingJobs, setIsLoadingJobs] = useState(true);
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -170,9 +168,7 @@ export default function JobList() {
     setHasError(false);
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/get-jobs`
-      );
+      const response = await fetch(`${API_BASE_URL}/api/get-jobs`);
 
       if (!response.ok) {
         throw new Error(`Failed to fetch jobs: ${response.statusText}`);
@@ -285,9 +281,9 @@ export default function JobList() {
             No Job Opportunities Yet
           </h3>
           <p className="text-muted-foreground mb-8 leading-relaxed">
-            We&apos;re constantly working to bring you the best career opportunities.
-            New positions are posted regularly, so check back soon or be the
-            first to post a job opening!
+            We&apos;re constantly working to bring you the best career
+            opportunities. New positions are posted regularly, so check back
+            soon or be the first to post a job opening!
           </p>
 
           {/* Action buttons */}

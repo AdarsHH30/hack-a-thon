@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MainLayout from "@/components/layouts/MainLayout";
+import API_BASE_URL from "@/lib/api-config";
 
 interface AnalysisResults {
   success: boolean;
@@ -49,9 +50,6 @@ interface AnalysisResults {
     resume_optimization: string[];
   };
 }
-
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8001";
 
 export default function AnalyzePage() {
   const router = useRouter();
