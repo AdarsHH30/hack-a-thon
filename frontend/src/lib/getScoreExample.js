@@ -19,11 +19,6 @@ const getMatchingScore = async (resumeFile, jobId) => {
     const result = await response.json();
 
     if (result.success) {
-      console.log('Matching Score:', result.score);
-      console.log('Verdict:', result.verdict);
-      console.log('Matched Skills:', result.matched_skills);
-      console.log('Missing Skills:', result.missing_skills);
-
       return {
         score: result.score,
         verdict: result.verdict,
@@ -37,7 +32,6 @@ const getMatchingScore = async (resumeFile, jobId) => {
       throw new Error('Score calculation failed');
     }
   } catch (error) {
-    console.error('Error getting matching score:', error);
     throw error;
   }
 };

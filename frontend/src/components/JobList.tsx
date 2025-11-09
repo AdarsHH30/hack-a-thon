@@ -204,12 +204,10 @@ export default function JobList() {
 
         setJobDescriptions(transformedJobs);
       } else {
-        console.error("API response unsuccessful:", data);
         // Set empty array if API returns no jobs
         setJobDescriptions([]);
       }
     } catch (error) {
-      console.error("Error fetching jobs:", error);
       setHasError(true);
       // Use mock data only if there's an error, not if there are simply no jobs
       setJobDescriptions(mockJobs);
@@ -575,7 +573,6 @@ export default function JobList() {
 
                 <JDupload
                   onUploadSuccess={(data) => {
-                    console.log("Upload successful:", data);
                     // Refresh job descriptions after successful upload
                     loadJobDescriptions();
                     // Close modal after successful upload
@@ -584,7 +581,6 @@ export default function JobList() {
                     }, 2000);
                   }}
                   onUploadError={(error) => {
-                    console.error("Upload error:", error);
                     // Keep modal open on error so user can try again
                   }}
                 />

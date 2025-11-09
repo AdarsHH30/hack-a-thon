@@ -162,12 +162,10 @@ export default function JobDescription() {
 
         setJobDescriptions(transformedJobs);
       } else {
-        console.error("API response unsuccessful:", data);
         // Fallback to empty array if API fails
         setJobDescriptions([]);
       }
     } catch (error) {
-      console.error("Error fetching jobs:", error);
       // Fallback to empty array if fetch fails
       setJobDescriptions([]);
     } finally {
@@ -340,7 +338,6 @@ export default function JobDescription() {
           <ResumeUpload
             jobId={jobId || undefined}
             onMatchComplete={(results) => {
-              console.log("Match analysis completed:", results);
               setAnalysisResults(results);
             }}
           />

@@ -164,7 +164,6 @@ export default function ResumeUpload({
       }
 
       const uploadResult = await uploadResponse.json();
-      console.log("Resume uploaded successfully:", uploadResult);
 
       // Step 2: Perform matching if jobId is provided
       if (jobId) {
@@ -191,7 +190,6 @@ export default function ResumeUpload({
         setMatchResults(matchData);
         setUploadProgress(100);
 
-        console.log("Matching completed:", matchData);
         onMatchComplete?.(matchData);
       } else {
         setUploadProgress(100);
@@ -202,7 +200,6 @@ export default function ResumeUpload({
         setUploadProgress(0);
       }, 1000);
     } catch (error) {
-      console.error("Upload/Matching error:", error);
       setUploadStatus("error");
       setErrorMessage(error instanceof Error ? error.message : "Upload failed");
     } finally {

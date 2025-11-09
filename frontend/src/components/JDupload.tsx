@@ -129,7 +129,6 @@ export default function JDupload({
 
       onUploadSuccess?.(result);
     } catch (error) {
-      console.error("Upload error:", error);
       setUploadStatus("error");
       setErrorMessage(error instanceof Error ? error.message : "Upload failed");
       onUploadError?.(error instanceof Error ? error.message : "Upload failed");

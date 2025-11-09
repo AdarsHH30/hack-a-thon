@@ -134,7 +134,6 @@ export default function AnalyzePage() {
     setResumeFile(null);
     setResults(null);
     setError("");
-    console.log("🔄 Reset all inputs and results");
   };
 
   const handleAnalyze = async () => {
@@ -168,7 +167,6 @@ export default function AnalyzePage() {
 
       // Step 1: Extract text from JD PDF if provided
       if (jdFile) {
-        console.log("Uploading JD PDF:", jdFile.name);
         const jdFormData = new FormData();
         jdFormData.append("jd_file", jdFile);
 
@@ -178,7 +176,6 @@ export default function AnalyzePage() {
         });
 
         const jdData = await jdResponse.json();
-        console.log("JD Response:", jdData);
 
         if (!jdResponse.ok) {
           throw new Error(
@@ -188,7 +185,6 @@ export default function AnalyzePage() {
 
         // Check if this triggered automatic matching (has ai_analysis_results)
         if (jdData.ai_analysis_results) {
-          console.log("Auto-matching triggered by JD upload!");
           // Use the matching results directly
           setResults({
             success: jdData.success || true,
@@ -219,7 +215,6 @@ export default function AnalyzePage() {
       }
 
       // Step 2: Extract text from Resume PDF
-      console.log("Uploading Resume PDF:", resumeFile.name);
       const resumeFormData = new FormData();
       resumeFormData.append("resume_file", resumeFile);
 
@@ -229,7 +224,6 @@ export default function AnalyzePage() {
       });
 
       const resumeData = await resumeResponse.json();
-      console.log("Resume Response:", resumeData);
 
       if (!resumeResponse.ok) {
         throw new Error(resumeData.detail || "Failed to process resume PDF");
@@ -237,7 +231,6 @@ export default function AnalyzePage() {
 
       // Check if this triggered automatic matching (has ai_analysis_results)
       if (resumeData.ai_analysis_results) {
-        console.log("Auto-matching triggered by Resume upload!");
         // Use the matching results directly
         setResults({
           success: resumeData.success || true,
@@ -270,11 +263,7 @@ export default function AnalyzePage() {
         );
       }
 
-      console.log("Extracted JD text length:", jdTextExtracted.length);
-      console.log("Extracted Resume text length:", resumeTextExtracted.length);
-
       // Step 3: Send extracted text to AI analysis endpoint
-      console.log("Sending to AI analysis...");
       const analysisFormData = new FormData();
       analysisFormData.append("job_description_text", jdTextExtracted);
       analysisFormData.append("resume_text", resumeTextExtracted);
@@ -285,7 +274,6 @@ export default function AnalyzePage() {
       });
 
       const analysisData = await analysisResponse.json();
-      console.log("Analysis Response:", analysisData);
 
       if (!analysisResponse.ok) {
         throw new Error(analysisData.detail || "Analysis failed");
@@ -331,7 +319,6 @@ export default function AnalyzePage() {
           ? err.message
           : "Analysis failed. Please try again."
       );
-      console.error("Analysis error:", err);
     } finally {
       setIsAnalyzing(false);
     }
@@ -638,7 +625,7 @@ export default function AnalyzePage() {
                         <CardHeader>
                           <CardTitle className="flex items-center gap-2 text-gray-900">
                             <TrendingUp className="w-5 h-5 text-green-600" />
-                            Matched Skills
+                            Your Strengths
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -664,7 +651,7 @@ export default function AnalyzePage() {
                         <CardHeader>
                           <CardTitle className="flex items-center gap-2 text-gray-900">
                             <AlertCircle className="w-5 h-5 text-red-600" />
-                            Missing Critical Skills
+                            Growth Opportunities
                           </CardTitle>
                         </CardHeader>
                         <CardContent>

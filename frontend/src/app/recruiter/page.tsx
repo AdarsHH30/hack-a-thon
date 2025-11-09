@@ -94,7 +94,6 @@ export default function RecruiterPage() {
 
       if (response.ok) {
         const result = await response.json();
-        console.log("Job description uploaded successfully:", result);
         setUploadSuccess(true);
         // Reset file after successful upload
         setTimeout(() => {
@@ -102,11 +101,9 @@ export default function RecruiterPage() {
           setUploadSuccess(false);
         }, 3000);
       } else {
-        console.error("Upload failed:", response.statusText);
         alert("Upload failed. Please try again.");
       }
     } catch (error) {
-      console.error("Error uploading job description:", error);
       alert("Upload error. Please try again.");
     } finally {
       setIsUploading(false);
